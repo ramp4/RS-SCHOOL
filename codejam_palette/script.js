@@ -10,11 +10,10 @@ const ColorMatrix = [
 ];
 
 const example = document.querySelector('.canvas_element');
-const ctx = example.getContext('2d');
 
+const ctx = example.getContext('2d');
 example.width = 512;
 example.height = 512;
-
 ctx.scale(128, 128);
 for (let i = 0; i < 4; i += 1) {
   for (let j = 0; j < 4; j += 1) {
@@ -24,7 +23,13 @@ for (let i = 0; i < 4; i += 1) {
 }
 ctx.scale(1 / 128, 1 / 128);
 
-// Toolbar
+const dataURL = localStorage.getItem('saved');
+const img = new Image();
+img.src = dataURL;
+img.onload = function saver() {
+  ctx.drawImage(img, 0, 0);
+};
+
 const ToolsArray = document.getElementsByClassName('tools--item');
 let CurrentTool = ToolsArray[0];
 
@@ -217,4 +222,8 @@ example.addEventListener('click', (event) => {
       FillBucket4(event.offsetX - 1, event.offsetY);
     }
   }
+});
+
+window.addEventListener('click', () => {
+  localStorage.setItem('saved', example.toDataURL());
 });
