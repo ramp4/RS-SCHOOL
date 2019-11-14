@@ -1,17 +1,22 @@
 {
-  "name": "CodeJam-dom_Palette",
+  "name": "codejam_palette",
   "version": "1.0.0",
   "description": "",
   "main": "script.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "dependencies": {},
   "devDependencies": {
-    "eslint": "^5.16.0",
-    "eslint-config-airbnb": "^17.1.0",
-    "eslint-plugin-import": "^2.17.2"
-  }
+    "eslint": "^6.6.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-autofix": "0.0.9",
+    "eslint-plugin-import": "^2.18.2"
+  },
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ramp4"
+  },
+  "author": "Artsem Balunda",
+  "license": "ISC"
 }

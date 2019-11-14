@@ -1,139 +1,165 @@
-/* eslint-disable no-param-reassign */
+/* eslint-disable prefer-destructuring */
+/* eslint-disable no-loop-func */
 /* eslint-disable no-plusplus */
-/* eslint linebreak-style: ["error", "windows"] */
-/* eslint-env browser */
 
-const tools = document.querySelectorAll('div.tools>button');
-const state = {};
+const ColorMatrix = [
+  ['00BCD4', 'FFEB3B', 'FFEB3B', '00BCD4'],
+  ['FFEB3B', 'FFC107', 'FFC107', 'FFEB3B'],
+  ['FFEB3B', 'FFC107', 'FFC107', 'FFEB3B'],
+  ['00BCD4', 'FFEB3B', 'FFEB3B', '00BCD4'],
+];
 
-function toolChooser(event) {
-  if (state.curTool) state.curTool.style.border = '';
-  state.curTool = event.path[1];
-  state.curTool.style.border = '#ccc solid 1px';
+const example = document.querySelector('.canvas_element');
+const ctx = example.getContext('2d');
+
+example.width = 512;
+example.height = 512;
+
+ctx.scale(128, 128);
+for (let i = 0; i < 4; i += 1) {
+  for (let j = 0; j < 4; j += 1) {
+    ctx.fillStyle = `#${ColorMatrix[i][j]}`;
+    ctx.fillRect(i, j, 1, 1);
+  }
 }
+ctx.scale(1 / 128, 1 / 128);
+
+// Toolbar
+const ToolsArray = document.getElementsByClassName('tools--item');
+let CurrentTool = ToolsArray[0];
+
 for (let i = 0; i < 4; i++) {
-  tools[i].addEventListener('click', toolChooser);
+  ToolsArray[i].addEventListener('click', (event) => {
+    CurrentTool.classList.remove('tools--item-selected');
+    CurrentTool = ToolsArray[i];
+    event.target.classList.add('tools--item-selected');
+  });
 }
 
-const colors = document.querySelectorAll('div.color-circle');
-colors[0].style.backgroundColor = '#C4C4C4';
-colors[1].style.backgroundColor = '#41F795';
-colors[2].style.backgroundColor = '#F74141';
-colors[3].style.backgroundColor = '#41B6F7';
-state.curColor = '#C4C4C4';
-state.prevColor = '#41F795';
+document.addEventListener('keydown', (event) => {
+  if (event.code === 'KeyP') {
+    CurrentTool.classList.remove('tools--item-selected');
+    CurrentTool = ToolsArray[2];
+    ToolsArray[2].classList.add('tools--item-selected');
+  }
+});
 
-const figures = document.querySelectorAll('section.figures>div.figure');
+document.addEventListener('keydown', (event) => {
+  if (event.code === 'KeyB') {
+    CurrentTool.classList.remove('tools--item-selected');
+    CurrentTool = ToolsArray[0];
+    ToolsArray[0].classList.add('tools--item-selected');
+  }
+});
 
-figures[0].style.backgroundColor = '#cccccc';
-figures[1].style.backgroundColor = '#bdbdbd';
-figures[2].style.backgroundColor = '#bfbfbf';
-figures[3].style.backgroundColor = '#bababa';
-figures[4].style.backgroundColor = '#cfcfcf';
-figures[5].style.backgroundColor = '#c9c9c9';
-figures[6].style.backgroundColor = '#c7c7c7';
-figures[7].style.backgroundColor = '#c4c4c4';
-figures[8].style.backgroundColor = '#cccccc';
-figures[6].style.borderRadius = '50%';
-state.curTool = tools[0];
-state.curTool.style.border = '#ccc solid 1px';
-function chooseColor(event) {
-  if (state.curTool.innerText === 'Choose color') {
-    if (state.curColor !== event.target.style.backgroundColor) {
-      state.prevColor = state.curColor;
-      state.curColor = event.target.style.backgroundColor;
-      colors[0].style.backgroundColor = state.curColor;
-      colors[1].style.backgroundColor = state.prevColor;
+document.addEventListener('keydown', (event) => {
+  if (event.code === 'KeyC') {
+    CurrentTool.classList.remove('tools--item-selected');
+    CurrentTool = ToolsArray[1];
+    ToolsArray[1].classList.add('tools--item-selected');
+  }
+});
+
+let pixel = ctx.getImageData(1, 1, 1, 1);
+
+function pos(event) {
+  pixel = ctx.getImageData(event.offsetX, event.offsetY, 1, 1);
+}
+
+example.addEventListener('mousemove', pos);
+
+const CurrentColor = document.querySelector('.colors--item_1 > .color');
+CurrentColor.style.background = '#FFC107';
+const PreviousColor = document.querySelector('.colors--item_2 > .color');
+PreviousColor.style.background = '#FFEB3B';
+const RedColor = document.querySelector('.colors--item_3 > .color');
+RedColor.style.background = '#F74141';
+const BlueColor = document.querySelector('.colors--item_4 > .color');
+BlueColor.style.background = '#00BCD4';
+
+function ChooseColor() {
+  if (CurrentTool === ToolsArray[1]) {
+    const { data } = pixel;
+    let rgba;
+    if (data[3] / 255 !== 1) {
+      rgba = `rgba(${data[0]}, ${data[1]}, ${data[2]}, ${data[3] / 255})`;
+    } else {
+      rgba = `rgb(${data[0]}, ${data[1]}, ${data[2]})`;
+    }
+    if (rgba !== CurrentColor.style.background) {
+      PreviousColor.style.background = CurrentColor.style.background;
+      CurrentColor.style.background = rgba;
     }
   }
 }
 
-for (let i = 0; i < 4; i++) {
-  colors[i].addEventListener('click', chooseColor);
-}
-
-function paintBucket() {
-  if (state.curTool.innerText === 'Paint bucket') {
-    state.curFigure.style.backgroundColor = state.curColor;
-  }
-}
-function transform() {
-  if (state.curTool.innerText === 'Transform') {
-    state.curFigure.style.borderRadius = `${Math.random() * 50}%`;
-  }
-}
-function move(event) {
-  if (state.curTool.innerText === 'Move') {
-    item = event.target;
-    function getCoords(elem) {
-      let box = elem.getBoundingClientRect();
-      return {
-        top: box.top + window.pageYOffset,
-        left: box.left + window.pageXOffset,
-      };
+function ChooseDefaultColors(event) {
+  if (CurrentTool === ToolsArray[1]) {
+    if (CurrentColor.style.background !== event.target.style.background) {
+      PreviousColor.style.background = CurrentColor.style.background;
+      CurrentColor.style.background = event.target.style.background;
     }
-
-    item.onmousedown = function coords(e) {
-      item.coords = getCoords(item);
-      item.shiftX = e.pageX - item.coords.left;
-      item.shiftY = e.pageY - item.coords.top;
-
-      item.style.position = 'absolute';
-      document.querySelector('main').appendChild(item);
-
-      function moveAt(e) {
-        item.style.margin = '0';
-        item.style.left = `${e.pageX - item.shiftX}px`;
-        item.style.top = `${e.pageY - item.shiftY}px`;
-      }
-      moveAt(e);
-
-      item.style.zIndex = 1000;
-
-      document.onmousemove = function onmousemove(e) {
-        moveAt(e);
-      };
-
-      item.onmouseup = function onmouseup() {
-        document.onmousemove = null;
-        item.onmouseup = null;
-        item.onmousedown = null;
-      };
-    };
   }
 }
 
-function figureChanger(event) {
-  state.curFigure = event.target;
-  paintBucket();
-  transform();
-}
+RedColor.addEventListener('click', ChooseDefaultColors);
+BlueColor.addEventListener('click', ChooseDefaultColors);
 
-for (let i = 0; i < 9; i++) {
-  figures[i].addEventListener('click', figureChanger);
-  figures[i].addEventListener('click', chooseColor);
-  figures[i].addEventListener('mouseover', move);
-}
+example.addEventListener('click', ChooseColor);
 
-function keyboardInput(event) {
-  if (state.curTool) state.curTool.style.border = '';
-  switch (event.code) {
-    case 'KeyP':
-      state.curTool = tools[0];
-      state.curTool.style.border = '#ccc solid 1px';
-      break;
-    case 'KeyC':
-      state.curTool = tools[1];
-      state.curTool.style.border = '#ccc solid 1px';
-      break;
-    case 'KeyM':
-      state.curTool = tools[2];
-      state.curTool.style.border = '#ccc solid 1px';
-      break;
-    case 'KeyT':
-      state.curTool = tools[3];
-      state.curTool.style.border = '#ccc solid 1px';
-      break;
+function Draw(event) {
+  ctx.fillStyle = CurrentColor.style.background;
+  ctx.fillRect(event.offsetX, event.offsetY, 25, 25);
+}
+function Pencil() {
+  if (CurrentTool === ToolsArray[2]) {
+    example.addEventListener('mousemove', Draw);
+    example.addEventListener('mouseup', () => {
+      example.removeEventListener('mousemove', Draw);
+    });
   }
 }
-document.addEventListener('keypress', keyboardInput);
+
+example.addEventListener('mousedown', Pencil);
+
+function PixelIsSame(args) {
+  for (let i = 0; i < 4; i++) {
+    if (args[0][i] !== args[1][i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function FillBucket(x, y) {
+  const startPixel = ctx.getImageData(x, y, 1, 1).data;
+  ctx.fillRect(x, y, 1, 1);
+  console.log(startPixel);
+  if (x >= 0 && x < 512 && y > 0 && y < 512) {
+    const a = ctx.getImageData(x, y + 1, 1, 1).data;
+    // const b = ctx.getImageData(x + 1, y, 1, 1).data;
+    // const c = ctx.getImageData(x - 1, y, 1, 1).data;
+    // const d = ctx.getImageData(x, y - 1, 1, 1).data;
+    if (PixelIsSame(a, startPixel)) FillBucket(x, y - 1);
+    // if (PixelIsSame(b, startPixel)) FillBucket(x + 1, y);
+    // if (PixelIsSame(c, startPixel)) FillBucket(x - 1, y);
+    // if (PixelIsSame(d, startPixel)) FillBucket(x, y - 1);
+  }
+}
+
+example.addEventListener('click', (event) => {
+  if (CurrentTool === ToolsArray[0]) {
+    const checkPixel = ctx.getImageData(event.offsetX, event.offsetY, 1, 1);
+    const data = checkPixel.data;
+    let rgba;
+    if (data[3] / 255 !== 1) {
+      rgba = `rgba(${data[0]}, ${data[1]}, ${data[2]}, ${data[3] / 255})`;
+    } else {
+      rgba = `rgb(${data[0]}, ${data[1]}, ${data[2]})`;
+    }
+    if (rgba !== CurrentColor.style.background) {
+      ctx.fillStyle = CurrentColor.style.background;
+      FillBucket(event.offsetX, event.offsetY);
+    }
+  }
+});
