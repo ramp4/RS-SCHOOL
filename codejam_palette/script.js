@@ -114,7 +114,7 @@ function Draw(event) {
 function Pencil() {
   if (CurrentTool === ToolsArray[2]) {
     example.addEventListener('mousemove', Draw);
-    example.addEventListener('mouseup', () => {
+    document.addEventListener('mouseup', () => {
       example.removeEventListener('mousemove', Draw);
     });
   }
@@ -122,28 +122,80 @@ function Pencil() {
 
 example.addEventListener('mousedown', Pencil);
 
-function PixelIsSame(args) {
+function PixelIsSame(q, w) {
   for (let i = 0; i < 4; i++) {
-    if (args[0][i] !== args[1][i]) {
+    if (q[i] !== w[i]) {
       return false;
     }
   }
   return true;
 }
 
-function FillBucket(x, y) {
+function FillBucket1(x, y) {
   const startPixel = ctx.getImageData(x, y, 1, 1).data;
-  ctx.fillRect(x, y, 1, 1);
-  console.log(startPixel);
-  if (x >= 0 && x < 512 && y > 0 && y < 512) {
+
+  if (x >= 0 && x <= 512 && y >= 0 && y <= 512) {
     const a = ctx.getImageData(x, y + 1, 1, 1).data;
-    // const b = ctx.getImageData(x + 1, y, 1, 1).data;
+    const b = ctx.getImageData(x + 1, y, 1, 1).data;
     // const c = ctx.getImageData(x - 1, y, 1, 1).data;
     // const d = ctx.getImageData(x, y - 1, 1, 1).data;
-    if (PixelIsSame(a, startPixel)) FillBucket(x, y - 1);
-    // if (PixelIsSame(b, startPixel)) FillBucket(x + 1, y);
+
+    if (PixelIsSame(a, startPixel)) FillBucket1(x, y + 1);
+    if (PixelIsSame(b, startPixel)) FillBucket1(x + 1, y);
     // if (PixelIsSame(c, startPixel)) FillBucket(x - 1, y);
     // if (PixelIsSame(d, startPixel)) FillBucket(x, y - 1);
+    ctx.fillRect(x, y, 1, 1);
+  }
+}
+
+function FillBucket2(x, y) {
+  const startPixel = ctx.getImageData(x, y, 1, 1).data;
+
+  if (x >= 0 && x <= 512 && y >= 0 && y <= 512) {
+    // const a = ctx.getImageData(x, y + 1, 1, 1).data;
+    // const b = ctx.getImageData(x + 1, y, 1, 1).data;
+    const c = ctx.getImageData(x - 1, y, 1, 1).data;
+    const d = ctx.getImageData(x, y - 1, 1, 1).data;
+
+    // if (PixelIsSame(a, startPixel)) FillBucket1(x, y + 1);
+    // if (PixelIsSame(b, startPixel)) FillBucket1(x + 1, y);
+    if (PixelIsSame(c, startPixel)) FillBucket2(x - 1, y);
+    if (PixelIsSame(d, startPixel)) FillBucket2(x, y - 1);
+    ctx.fillRect(x, y, 1, 1);
+  }
+}
+
+function FillBucket3(x, y) {
+  const startPixel = ctx.getImageData(x, y, 1, 1).data;
+
+  if (x >= 0 && x <= 512 && y >= 0 && y <= 512) {
+    // const a = ctx.getImageData(x, y + 1, 1, 1).data;
+    const b = ctx.getImageData(x + 1, y, 1, 1).data;
+    // const c = ctx.getImageData(x - 1, y, 1, 1).data;
+    const d = ctx.getImageData(x, y - 1, 1, 1).data;
+
+    // if (PixelIsSame(a, startPixel)) FillBucket1(x, y + 1);
+    if (PixelIsSame(b, startPixel)) FillBucket1(x + 1, y);
+    // if (PixelIsSame(c, startPixel)) FillBucket3(x - 1, y);
+    if (PixelIsSame(d, startPixel)) FillBucket3(x, y - 1);
+    ctx.fillRect(x, y, 1, 1);
+  }
+}
+
+function FillBucket4(x, y) {
+  const startPixel = ctx.getImageData(x, y, 1, 1).data;
+
+  if (x >= 0 && x <= 512 && y >= 0 && y <= 512) {
+    const a = ctx.getImageData(x, y + 1, 1, 1).data;
+    // const b = ctx.getImageData(x + 1, y, 1, 1).data;
+    const c = ctx.getImageData(x - 1, y, 1, 1).data;
+    // const d = ctx.getImageData(x, y - 1, 1, 1).data;
+
+    if (PixelIsSame(a, startPixel)) FillBucket4(x, y + 1);
+    // if (PixelIsSame(b, startPixel)) FillBucket1(x + 1, y);
+    if (PixelIsSame(c, startPixel)) FillBucket4(x - 1, y);
+    // if (PixelIsSame(d, startPixel)) FillBucket3(x, y - 1);
+    ctx.fillRect(x, y, 1, 1);
   }
 }
 
@@ -159,7 +211,10 @@ example.addEventListener('click', (event) => {
     }
     if (rgba !== CurrentColor.style.background) {
       ctx.fillStyle = CurrentColor.style.background;
-      FillBucket(event.offsetX, event.offsetY);
+      FillBucket1(event.offsetX, event.offsetY);
+      FillBucket2(event.offsetX - 1, event.offsetY - 1);
+      FillBucket3(event.offsetX, event.offsetY - 1);
+      FillBucket4(event.offsetX - 1, event.offsetY);
     }
   }
 });
