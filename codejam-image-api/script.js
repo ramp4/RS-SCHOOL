@@ -1,20 +1,21 @@
 /* eslint-disable prefer-destructuring */
 /* eslint-disable no-loop-func */
+/* eslint-disable no-plusplus */
 
 const ColorMatrix = [
-  ["00BCD4", "FFEB3B", "FFEB3B", "00BCD4"],
-  ["FFEB3B", "FFC107", "FFC107", "FFEB3B"],
-  ["FFEB3B", "FFC107", "FFC107", "FFEB3B"],
-  ["00BCD4", "FFEB3B", "FFEB3B", "00BCD4"]
+  ['00BCD4', 'FFEB3B', 'FFEB3B', '00BCD4'],
+  ['FFEB3B', 'FFC107', 'FFC107', 'FFEB3B'],
+  ['FFEB3B', 'FFC107', 'FFC107', 'FFEB3B'],
+  ['00BCD4', 'FFEB3B', 'FFEB3B', '00BCD4'],
 ];
 
-const example = document.querySelector(".canvas_element");
+const example = document.querySelector('.canvas_element');
 
-const ctx = example.getContext("2d");
+const ctx = example.getContext('2d');
 example.width = 512;
 example.height = 512;
 ctx.scale(128, 128);
-for (let i = 0; i < 4; i++) {
+for (let i = 0; i < 4; i += 1) {
   for (let j = 0; j < 4; j += 1) {
     ctx.fillStyle = `#${ColorMatrix[i][j]}`;
     ctx.fillRect(i, j, 1, 1);
@@ -22,45 +23,45 @@ for (let i = 0; i < 4; i++) {
 }
 ctx.scale(1 / 128, 1 / 128);
 
-const dataURL = localStorage.getItem("saved");
+const dataURL = localStorage.getItem('saved');
 const img = new Image();
 img.src = dataURL;
 img.onload = function saver() {
   ctx.drawImage(img, 0, 0);
 };
 
-const ToolsArray = document.getElementsByClassName("tools--item");
+const ToolsArray = document.getElementsByClassName('tools--item');
 let CurrentTool = ToolsArray[0];
 
-for (let i = 0; i < 4; i + 1) {
-  ToolsArray[i].addEventListener("click", event => {
-    CurrentTool.classList.remove("tools--item-selected");
+for (let i = 0; i < 4; i++) {
+  ToolsArray[i].addEventListener('click', (event) => {
+    CurrentTool.classList.remove('tools--item-selected');
     CurrentTool = ToolsArray[i];
-    event.target.classList.add("tools--item-selected");
+    event.target.classList.add('tools--item-selected');
   });
 }
 
-document.addEventListener("keydown", event => {
-  if (event.code === "KeyP") {
-    CurrentTool.classList.remove("tools--item-selected");
+document.addEventListener('keydown', (event) => {
+  if (event.code === 'KeyP') {
+    CurrentTool.classList.remove('tools--item-selected');
     CurrentTool = ToolsArray[2];
-    ToolsArray[2].classList.add("tools--item-selected");
+    ToolsArray[2].classList.add('tools--item-selected');
   }
 });
 
-document.addEventListener("keydown", event => {
-  if (event.code === "KeyB") {
-    CurrentTool.classList.remove("tools--item-selected");
+document.addEventListener('keydown', (event) => {
+  if (event.code === 'KeyB') {
+    CurrentTool.classList.remove('tools--item-selected');
     CurrentTool = ToolsArray[0];
-    ToolsArray[0].classList.add("tools--item-selected");
+    ToolsArray[0].classList.add('tools--item-selected');
   }
 });
 
-document.addEventListener("keydown", event => {
-  if (event.code === "KeyC") {
-    CurrentTool.classList.remove("tools--item-selected");
+document.addEventListener('keydown', (event) => {
+  if (event.code === 'KeyC') {
+    CurrentTool.classList.remove('tools--item-selected');
     CurrentTool = ToolsArray[1];
-    ToolsArray[1].classList.add("tools--item-selected");
+    ToolsArray[1].classList.add('tools--item-selected');
   }
 });
 
@@ -70,16 +71,16 @@ function pos(event) {
   pixel = ctx.getImageData(event.offsetX, event.offsetY, 1, 1);
 }
 
-example.addEventListener("mousemove", pos);
+example.addEventListener('mousemove', pos);
 
-const CurrentColor = document.querySelector(".colors--item_1 > .color");
-CurrentColor.style.background = "#FFC107";
-const PreviousColor = document.querySelector(".colors--item_2 > .color");
-PreviousColor.style.background = "#FFEB3B";
-const RedColor = document.querySelector(".colors--item_3 > .color");
-RedColor.style.background = "#F74141";
-const BlueColor = document.querySelector(".colors--item_4 > .color");
-BlueColor.style.background = "#00BCD4";
+const CurrentColor = document.querySelector('.colors--item_1 > .color');
+CurrentColor.style.background = '#FFC107';
+const PreviousColor = document.querySelector('.colors--item_2 > .color');
+PreviousColor.style.background = '#FFEB3B';
+const RedColor = document.querySelector('.colors--item_3 > .color');
+RedColor.style.background = '#F74141';
+const BlueColor = document.querySelector('.colors--item_4 > .color');
+BlueColor.style.background = '#00BCD4';
 
 function ChooseColor() {
   if (CurrentTool === ToolsArray[1]) {
@@ -106,10 +107,10 @@ function ChooseDefaultColors(event) {
   }
 }
 
-RedColor.addEventListener("click", ChooseDefaultColors);
-BlueColor.addEventListener("click", ChooseDefaultColors);
+RedColor.addEventListener('click', ChooseDefaultColors);
+BlueColor.addEventListener('click', ChooseDefaultColors);
 
-example.addEventListener("click", ChooseColor);
+example.addEventListener('click', ChooseColor);
 
 function Draw(event) {
   ctx.fillStyle = CurrentColor.style.background;
@@ -117,17 +118,17 @@ function Draw(event) {
 }
 function Pencil() {
   if (CurrentTool === ToolsArray[2]) {
-    example.addEventListener("mousemove", Draw);
-    document.addEventListener("mouseup", () => {
-      example.removeEventListener("mousemove", Draw);
+    example.addEventListener('mousemove', Draw);
+    document.addEventListener('mouseup', () => {
+      example.removeEventListener('mousemove', Draw);
     });
   }
 }
 
-example.addEventListener("mousedown", Pencil);
+example.addEventListener('mousedown', Pencil);
 
 function PixelIsSame(q, w) {
-  for (let i = 0; i < 4; i + 1) {
+  for (let i = 0; i < 4; i++) {
     if (q[i] !== w[i]) {
       return false;
     }
@@ -203,10 +204,10 @@ function FillBucket4(x, y) {
   }
 }
 
-example.addEventListener("click", event => {
+example.addEventListener('click', (event) => {
   if (CurrentTool === ToolsArray[0]) {
     const checkPixel = ctx.getImageData(event.offsetX, event.offsetY, 1, 1);
-    const { data } = checkPixel;
+    const data = checkPixel.data;
     let rgba;
     if (data[3] / 255 !== 1) {
       rgba = `rgba(${data[0]}, ${data[1]}, ${data[2]}, ${data[3] / 255})`;
@@ -223,6 +224,6 @@ example.addEventListener("click", event => {
   }
 });
 
-window.addEventListener("click", () => {
-  localStorage.setItem("saved", example.toDataURL());
+window.addEventListener('click', () => {
+  localStorage.setItem('saved', example.toDataURL());
 });
