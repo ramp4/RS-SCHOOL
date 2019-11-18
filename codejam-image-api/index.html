@@ -16,12 +16,12 @@
     </header>
     <main class="main">
       <ul class="tools app_bar">
-        <li class="tools--item tools--item-selected tools--item_1">
+        <li class="tools--item  tools--item_1">
           Fill bucket
         </li>
         <li class=" tools--item tools--item_2">Choose color</li>
         <div class="tools--divider"></div>
-        <li class="tools--item tools--item_3 ">Pencil</li>
+        <li class="tools--item tools--item_3 tools--item-selected">Pencil</li>
         <li class="tools--item tools--item_4">Transform</li>
       </ul>
       <ul class="colors app_bar">
@@ -45,6 +45,15 @@
       </ul>
 
       <div class="workspace">
+        <div class="image_loader_form">
+          <div class="image_loader_form--load">Load</div>
+
+          <div class="image_loader_form--search">
+            <div class="search_icon"></div>
+            <input class="search_input" type="text" />
+          </div>
+          <div class="image_loader_form--bw">B&W</div>
+        </div>
         <canvas class="canvas_element"></canvas>
       </div>
       <script src="./script.js"></script>

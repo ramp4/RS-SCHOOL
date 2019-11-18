@@ -2,26 +2,11 @@
 /* eslint-disable no-loop-func */
 /* eslint-disable no-plusplus */
 
-const ColorMatrix = [
-  ['00BCD4', 'FFEB3B', 'FFEB3B', '00BCD4'],
-  ['FFEB3B', 'FFC107', 'FFC107', 'FFEB3B'],
-  ['FFEB3B', 'FFC107', 'FFC107', 'FFEB3B'],
-  ['00BCD4', 'FFEB3B', 'FFEB3B', '00BCD4'],
-];
-
 const example = document.querySelector('.canvas_element');
 
 const ctx = example.getContext('2d');
 example.width = 512;
 example.height = 512;
-ctx.scale(128, 128);
-for (let i = 0; i < 4; i += 1) {
-  for (let j = 0; j < 4; j += 1) {
-    ctx.fillStyle = `#${ColorMatrix[i][j]}`;
-    ctx.fillRect(i, j, 1, 1);
-  }
-}
-ctx.scale(1 / 128, 1 / 128);
 
 if (localStorage.isSaved) {
   const dataURL = localStorage.getItem('saved');
@@ -30,11 +15,29 @@ if (localStorage.isSaved) {
   img.onload = function saver() {
     ctx.drawImage(img, 0, 0);
   };
+} else {
+  ctx.scale(4, 4);
+  let fillStatus = true;
+  for (let i = 0; i < 128; i += 1) {
+    for (let j = 0; j < 128; j += 1) {
+      if (fillStatus) {
+        ctx.fillStyle = '#4c4c4c';
+        fillStatus = false;
+      } else {
+        ctx.fillStyle = '#555555';
+        fillStatus = true;
+      }
+      ctx.fillRect(i, j, 1, 1);
+    }
+    fillStatus = !fillStatus;
+  }
+  ctx.scale(1 / 4, 1 / 4);
 }
 
 const ToolsArray = document.getElementsByClassName('tools--item');
 
-let CurrentTool = ToolsArray[0];
+let CurrentTool = ToolsArray[2];
+localStorage.SavedCurrentTool = 2;
 
 for (let i = 0; i < 4; i++) {
   ToolsArray[i].addEventListener('click', (event) => {
@@ -129,7 +132,7 @@ example.addEventListener('click', ChooseColor);
 
 function Draw(event) {
   ctx.fillStyle = CurrentColor.style.background;
-  ctx.fillRect(event.offsetX, event.offsetY, 25, 25);
+  ctx.fillRect(event.offsetX, event.offsetY, 4, 4);
 }
 function Pencil() {
   if (CurrentTool === ToolsArray[2]) {
@@ -152,7 +155,7 @@ function PixelIsSame(q, w) {
 }
 
 function FillBucket1(x, y) {
-  const startPixel = ctx.getImageData(x, y, 1, 1).data;
+  const startPixel = ctx.getImageData(x, y, 4, 4).data;
 
   if (x >= 0 && x <= 512 && y >= 0 && y <= 512) {
     const a = ctx.getImageData(x, y + 1, 1, 1).data;
@@ -244,4 +247,25 @@ document.addEventListener('click', () => {
   localStorage.isSaved = true;
   localStorage.setItem('SavedCurrentColor', CurrentColor.style.background);
   localStorage.setItem('SavedPreviousColor', PreviousColor.style.background);
+});
+
+const picture = new Image();
+const searchInput = document.querySelector('.search_input');
+
+async function drawNewCanvas() {
+  const url = `https://api.unsplash.com/photos/random?query=town,${searchInput.value}&client_id=fe6449c5e30a90a51b3f246ad14f20ddf1be8e78ee913d96cf0aeb65df9c8bd0`;
+  const response = await fetch(url);
+  const data = await response.json();
+
+  picture.src = data.urls.small;
+
+  picture.onload = function () {
+    ctx.drawImage(picture, 0, 0, 512, 512);
+  };
+}
+
+const loadButton = document.querySelector('.image_loader_form--load');
+
+loadButton.addEventListener('click', () => {
+  drawNewCanvas();
 });
