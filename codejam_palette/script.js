@@ -23,12 +23,14 @@ for (let i = 0; i < 4; i += 1) {
 }
 ctx.scale(1 / 128, 1 / 128);
 
-const dataURL = localStorage.getItem('saved');
-const img = new Image();
-img.src = dataURL;
-img.onload = function saver() {
-  ctx.drawImage(img, 0, 0);
-};
+if (localStorage.isSaved) {
+  const dataURL = localStorage.getItem('saved');
+  const img = new Image();
+  img.src = dataURL;
+  img.onload = function saver() {
+    ctx.drawImage(img, 0, 0);
+  };
+}
 
 const ToolsArray = document.getElementsByClassName('tools--item');
 let CurrentTool = ToolsArray[0];
@@ -226,4 +228,5 @@ example.addEventListener('click', (event) => {
 
 window.addEventListener('click', () => {
   localStorage.setItem('saved', example.toDataURL());
+  localStorage.isSaved = true;
 });
