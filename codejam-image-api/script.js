@@ -23,20 +23,24 @@ for (let i = 0; i < 4; i += 1) {
 }
 ctx.scale(1 / 128, 1 / 128);
 
-const dataURL = localStorage.getItem('saved');
-const img = new Image();
-img.src = dataURL;
-img.onload = function saver() {
-  ctx.drawImage(img, 0, 0);
-};
+if (localStorage.isSaved) {
+  const dataURL = localStorage.getItem('saved');
+  const img = new Image();
+  img.src = dataURL;
+  img.onload = function saver() {
+    ctx.drawImage(img, 0, 0);
+  };
+}
 
 const ToolsArray = document.getElementsByClassName('tools--item');
+
 let CurrentTool = ToolsArray[0];
 
 for (let i = 0; i < 4; i++) {
   ToolsArray[i].addEventListener('click', (event) => {
     CurrentTool.classList.remove('tools--item-selected');
     CurrentTool = ToolsArray[i];
+    localStorage.setItem('SavedCurrentTool', i);
     event.target.classList.add('tools--item-selected');
   });
 }
@@ -46,6 +50,7 @@ document.addEventListener('keydown', (event) => {
     CurrentTool.classList.remove('tools--item-selected');
     CurrentTool = ToolsArray[2];
     ToolsArray[2].classList.add('tools--item-selected');
+    localStorage.setItem('SavedCurrentTool', 2);
   }
 });
 
@@ -54,6 +59,7 @@ document.addEventListener('keydown', (event) => {
     CurrentTool.classList.remove('tools--item-selected');
     CurrentTool = ToolsArray[0];
     ToolsArray[0].classList.add('tools--item-selected');
+    localStorage.setItem('SavedCurrentTool', 2);
   }
 });
 
@@ -62,6 +68,7 @@ document.addEventListener('keydown', (event) => {
     CurrentTool.classList.remove('tools--item-selected');
     CurrentTool = ToolsArray[1];
     ToolsArray[1].classList.add('tools--item-selected');
+    localStorage.setItem('SavedCurrentTool', 2);
   }
 });
 
@@ -74,14 +81,22 @@ function pos(event) {
 example.addEventListener('mousemove', pos);
 
 const CurrentColor = document.querySelector('.colors--item_1 > .color');
-CurrentColor.style.background = '#FFC107';
 const PreviousColor = document.querySelector('.colors--item_2 > .color');
-PreviousColor.style.background = '#FFEB3B';
 const RedColor = document.querySelector('.colors--item_3 > .color');
 RedColor.style.background = '#F74141';
 const BlueColor = document.querySelector('.colors--item_4 > .color');
 BlueColor.style.background = '#00BCD4';
 
+if (!localStorage.isSaved) {
+  CurrentColor.style.background = '#FFC107';
+  PreviousColor.style.background = '#FFEB3B';
+} else {
+  CurrentColor.style.background = localStorage.getItem('SavedCurrentColor');
+  PreviousColor.style.background = localStorage.getItem('SavedPreviousColor');
+  CurrentTool.classList.remove('tools--item-selected');
+  CurrentTool = ToolsArray[localStorage.getItem('SavedCurrentTool')];
+  CurrentTool.classList.add('tools--item-selected');
+}
 function ChooseColor() {
   if (CurrentTool === ToolsArray[1]) {
     const { data } = pixel;
@@ -224,6 +239,9 @@ example.addEventListener('click', (event) => {
   }
 });
 
-window.addEventListener('click', () => {
+document.addEventListener('click', () => {
   localStorage.setItem('saved', example.toDataURL());
+  localStorage.isSaved = true;
+  localStorage.setItem('SavedCurrentColor', CurrentColor.style.background);
+  localStorage.setItem('SavedPreviousColor', PreviousColor.style.background);
 });
