@@ -13,7 +13,7 @@ if (localStorage.isSaved) {
   const img = new Image();
   img.src = dataURL;
   img.onload = function saver() {
-    ctx.drawImage(img, 0, 0);
+    ctx.drawImage(img, 0, 0, 512, 512);
   };
 } else {
   ctx.scale(4, 4);
@@ -256,11 +256,12 @@ async function drawNewCanvas() {
   const url = `https://api.unsplash.com/photos/random?query=town,${searchInput.value}&client_id=fe6449c5e30a90a51b3f246ad14f20ddf1be8e78ee913d96cf0aeb65df9c8bd0`;
   const response = await fetch(url);
   const data = await response.json();
-
   picture.src = data.urls.small;
+  picture.crossOrigin = "Anonymous";
 
   picture.onload = function () {
     ctx.drawImage(picture, 0, 0, 512, 512);
+    localStorage.setItem('saved', example.toDataURL("image/png"));
   };
 }
 
@@ -269,3 +270,7 @@ const loadButton = document.querySelector('.image_loader_form--load');
 loadButton.addEventListener('click', () => {
   drawNewCanvas();
 });
+
+
+
+
