@@ -1,6 +1,8 @@
 const infoLocation = document.querySelector('.info__location');
 const infoDate = document.querySelector('.info__date');
 const mainWeatherTemperature = document.querySelector('.main-weather__temperature');
+const mainWeatherIcon = document.querySelector('.main-weather__icon');
+
 
 function getLocationData() {
   const url = 'https://ipinfo.io/json?token=08f12254167956';
@@ -20,7 +22,9 @@ getLocationData().then((locationData) => {
   infoLocation.innerHTML = `${locationData.city}, ${getName(locationData.country)}`;
 
   getWeatherData(locationData.city, 'en').then((weatherData) => {
+    console.log(weatherData);
     mainWeatherTemperature.innerHTML = `${weatherData.main.temp}°`;
+    mainWeatherIcon.style.backgroundImage = `url('http://openweathermap.org/img/wn/${weatherData.weather[0].icon}@2x.png')`;
   });
 });
 

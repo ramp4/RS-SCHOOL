@@ -232,7 +232,6 @@ body {
   flex-direction: column;
   align-items: flex-start;
   justify-content: space-between;
-  background-color: #CCC;
 }
 
 .info {
@@ -264,17 +263,27 @@ body {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  background-color: red;
-
+  position: relative;
 }
 
 .main-weather__temperature {
   font-family: Montserrat;
   font-style: normal;
   font-weight: bold;
-  font-size: 15rem;
+  font-size: 10rem;
   text-transform: uppercase;
   color: #FFFFFF;
+}
+
+.main-weather__icon {
+  position: absolute;
+  height: 10rem;
+  width: 10rem;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  bottom: 0;
+  right: 0;
 }
 
 .section-2 {
