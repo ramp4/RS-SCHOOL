@@ -1,3 +1,5 @@
+// header
+
 const header = document.createElement('header');
 header.className = 'header';
 document.body.append(header);
@@ -60,3 +62,24 @@ const searchButton = document.createElement('div');
 searchButton.className = 'search-row__button';
 searchRow.append(searchButton);
 searchButton.innerHTML = 'Search';
+
+// main
+
+const main = document.createElement('main');
+main.className = 'main';
+document.body.append(main);
+
+
+// section-1
+
+const section1 = document.createElement('section');
+section1.className = 'section-1';
+main.append(section1);
+
+section1.insertAdjacentHTML('afterbegin', '<div class="info"><span class="info__location"></span><span class="info__date"></span></div><div class="main-weather"><span class="main-weather__temperature"></span><ul class="details"><li class="details__item"></li><li class="details__item"></li><li class="details__item"></li><li class="details__item"></li></ul><div class="weather__icon"></div></div>');
+
+// section-2
+
+const section2 = document.createElement('section');
+section2.className = 'section-2';
+main.append(section2);
