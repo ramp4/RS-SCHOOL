@@ -21,7 +21,6 @@ getLocationData().then((locationData) => {
 
   getWeatherData(locationData.city, 'en').then((weatherData) => {
     mainWeatherTemperature.innerHTML = `${weatherData.main.temp}°`;
-    console.log(weatherData);
   });
 });
 
