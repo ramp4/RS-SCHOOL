@@ -1,2 +1,2 @@
 import './BasicLayout';
-import './onLoadScript';
+import './weatherBlock';
