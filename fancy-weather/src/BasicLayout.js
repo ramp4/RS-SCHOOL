@@ -78,6 +78,13 @@ main.append(section1);
 
 section1.insertAdjacentHTML('afterbegin', '<div class="info"><span class="info__location"></span><span class="info__date"></span></div><div class="main-weather"><span class="main-weather__temperature"></span><ul class="details"><li class="details__item"></li><li class="details__item"></li><li class="details__item"></li><li class="details__item"></li></ul><div class="main-weather__icon"></div></div>');
 
+section1.insertAdjacentHTML('beforeend', '<ul class="forecast"><li class="forecast-item"></li><li class="forecast-item"></li><li class="forecast-item"></li></ul>');
+
+const forecastItemArray = document.getElementsByClassName('forecast-item');
+
+for (let i = 0; i < 3; i += 1) {
+  forecastItemArray[i].insertAdjacentHTML('afterbegin', '<span class="forecast-item__day"></span><span class="forecast-item__temperature"></span><div class="forecast-item__icon"></div>');
+}
 
 // section-2
 

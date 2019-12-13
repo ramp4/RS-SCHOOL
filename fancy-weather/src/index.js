@@ -1,2 +1,2 @@
 import './BasicLayout';
-import './onloadLayout';
+import './onloadScript';
