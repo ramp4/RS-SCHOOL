@@ -4,12 +4,11 @@ const mainWeatherTemperature = document.querySelector('.main-weather__temperatur
 const mainWeatherIcon = document.querySelector('.main-weather__icon');
 const detailsItems = document.getElementsByClassName('details__item');
 const body = document.querySelector('body');
-// const forecastItemArray = document.getElementsByClassName('forecast-item');
 const forecastItemDayArray = document.getElementsByClassName('forecast-item__day');
 const forecastItemTemperatureArray = document.getElementsByClassName('forecast-item__temperature');
 const forecastItemIconArray = document.getElementsByClassName('forecast-item__icon');
 
-const currentDate = new Date();
+let currentDate = new Date();
 function setDay(index) {
   let i = index;
   if (i > 6) {
@@ -48,6 +47,26 @@ function setCurrentDate() {
   return result;
 }
 infoDate.innerHTML = setCurrentDate();
+
+
+let refreshDate = function () {
+  currentDate = new Date();
+  console.log('a');
+  const seconds = currentDate.getSeconds();
+  if (seconds === 0) {
+    infoDate.innerHTML = setCurrentDate();
+    setInterval(() => {
+      infoDate.innerHTML = setCurrentDate();
+    }, 60000);
+    refreshDate = null;
+    return;
+  }
+  setTimeout(() => {
+    refreshDate();
+  }, 950);
+};
+
+refreshDate();
 
 function getLocationData() {
   const url = 'https://ipinfo.io/json?token=08f12254167956';
