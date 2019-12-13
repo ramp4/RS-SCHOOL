@@ -8,7 +8,8 @@ const forecastItemDayArray = document.getElementsByClassName('forecast-item__day
 const forecastItemTemperatureArray = document.getElementsByClassName('forecast-item__temperature');
 const forecastItemIconArray = document.getElementsByClassName('forecast-item__icon');
 
-let currentDate = new Date();
+const currentDate = new Date();
+
 function setDay(index) {
   let i = index;
   if (i > 6) {
@@ -18,7 +19,7 @@ function setDay(index) {
   return days[i];
 }
 
-function setCurrentDate() {
+function dateToTxt(date) {
   function setMonth(index) {
     const months = [
       'January',
@@ -37,26 +38,25 @@ function setCurrentDate() {
     return months[index];
   }
 
-
   function setZero(number) {
     if (number < 10) return `0${number}`;
     return number;
   }
-  const result = `${setDay(currentDate.getDay())} ${setZero(currentDate.getDate())} ${setMonth(currentDate.getMonth())} ${setZero(currentDate.getHours())}:${setZero(currentDate.getMinutes())}`;
+  const result = `${setDay(date.getDay())} ${setZero(date.getDate())} ${setMonth(date.getMonth())} ${setZero(date.getHours())}:${setZero(date.getMinutes())}`;
 
   return result;
 }
-infoDate.innerHTML = setCurrentDate();
 
+infoDate.innerHTML = dateToTxt(currentDate);
 
-let refreshDate = function () {
-  currentDate = new Date();
-  console.log('a');
-  const seconds = currentDate.getSeconds();
+let refreshDate = function refreshDateFunction() {
+  let updatedDate = new Date();
+  const seconds = updatedDate.getSeconds();
   if (seconds === 0) {
-    infoDate.innerHTML = setCurrentDate();
+    infoDate.innerHTML = dateToTxt(updatedDate);
     setInterval(() => {
-      infoDate.innerHTML = setCurrentDate();
+      updatedDate = new Date();
+      infoDate.innerHTML = dateToTxt(updatedDate);
     }, 60000);
     refreshDate = null;
     return;
