@@ -91,3 +91,8 @@ for (let i = 0; i < 3; i += 1) {
 const section2 = document.createElement('section');
 section2.className = 'section-2';
 main.append(section2);
+
+section2.insertAdjacentHTML('afterbegin', '<div class="map"></div><div class="geo-info"></div>');
+
+const geoInfo = document.querySelector('.geo-info');
+geoInfo.insertAdjacentHTML('afterbegin', '<span class="latitude"></span><span class="longitude"></span>');
