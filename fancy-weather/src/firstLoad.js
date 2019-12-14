@@ -37,7 +37,7 @@ function getWeatherData(city, lang) {
 getLocationData().then((locationData) => {
   infoLocation.innerHTML = `${locationData.city}, ${getName(locationData.country)}`;
   sessionStorage.setItem('city', locationData.city);
-  sessionStorage.setItem('tType', ' Celsius');
+  sessionStorage.setItem('tType', 'Celsius');
   const latitude = locationData.loc.slice(0, 7);
   sessionStorage.setItem('latitude', Math.round(latitude * 100) / 100);
   const longitude = locationData.loc.slice(8, 15);
@@ -156,7 +156,7 @@ const tryGetWeatherData = setInterval(() => {
         nextDayIndex += 8;
       }
 
-
+      sessionStorage.setItem('weather', weatherData.weather[0].main);
       getBG(`${weatherData.weather[0].main} weather`).then((background) => {
         body.style.backgroundImage = `linear-gradient(180deg, rgba(8, 15, 26, 0.59) 0%, rgba(17, 17, 46, 0.46) 100%),
         url('${background}')`;
@@ -184,9 +184,10 @@ const options = {
 
 function success(pos) {
   const crd = pos.coords;
-
-  sessionStorage.setItem('latitude', Math.round(crd.latitude * 100) / 100);
-  sessionStorage.setItem('longitude', Math.round(crd.longitude * 100) / 100);
+  if (sessionStorage.latitude === undefined) {
+    sessionStorage.latitude = Math.round(crd.latitude * 100) / 100;
+    sessionStorage.longitude = Math.round(crd.longitude * 100) / 100;
+  }
 }
 
 function error(err) {

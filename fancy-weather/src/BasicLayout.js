@@ -33,12 +33,12 @@ tSwitcher.className = 'temperature-switcher';
 buttonRow.append(tSwitcher);
 
 const fTemp = document.createElement('div');
-fTemp.className = 'temperature-switcher__item';
+fTemp.className = 'temperature-switcher__item temperature-switcher__item_fahrenheit';
 tSwitcher.append(fTemp);
 fTemp.innerHTML = '°F';
 
 const cTemp = document.createElement('div');
-cTemp.className = 'temperature-switcher__item temperature-switcher__item_current';
+cTemp.className = 'temperature-switcher__item temperature-switcher__item_celsius temperature-switcher__item_current';
 tSwitcher.append(cTemp);
 cTemp.innerHTML = '°С';
 
