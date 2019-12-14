@@ -41,10 +41,10 @@ getLocationData().then((locationData) => {
   infoLocation.innerHTML = `${locationData.city}, ${getName(locationData.country)}`;
   sessionStorage.setItem('city', locationData.city);
   sessionStorage.setItem('tType', ' Celsius');
-  // const latitude = locationData.loc;
-  // sessionStorage.setItem('latitude', latitude);
-  // const longitude = locationData.loc[1];
-  // sessionStorage.setItem('longitude', longitude);
+  const latitude = locationData.loc.slice(0, 7);
+  sessionStorage.setItem('latitude', Math.round(latitude * 100) / 100);
+  const longitude = locationData.loc.slice(8, 15);
+  sessionStorage.setItem('longitude', Math.round(longitude * 100) / 100);
 });
 
 

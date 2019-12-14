@@ -264,8 +264,8 @@ body {
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
-  width: 100%;
   flex-wrap: wrap;
+  width: 100%;
 }
 
 .main-weather__temperature {
@@ -387,7 +387,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
 }
 
 #map {
@@ -398,4 +398,5 @@ body {
   min-width: 375px;
   height: 25vw;
   border-radius: 1rem;
+  font-size: 0;
 }
