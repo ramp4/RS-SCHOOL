@@ -63,9 +63,9 @@ for (let i = 0; i < 2; i += 1) {
     let value = mainWeatherTemperature.innerHTML;
     mainWeatherTemperature.innerHTML = `${convertTemperature(value)}`;
 
-
+    const feelsLike = { en: 'feels like:', ru: 'чувствуется как:', be: 'адчуваецца як:' };
     value = detailsWeather.innerHTML.slice(12, detailsWeather.innerHTML.length - 1);
-    detailsWeather.innerHTML = `feels like: ${convertTemperature(value)}°`;
+    detailsWeather.innerHTML = `${feelsLike[sessionStorage.lang]} ${convertTemperature(value)}°`;
 
     for (let j = 0; j < 3; j += 1) {
       value = forecastItemTemperatureArray[j].innerHTML;
@@ -113,7 +113,7 @@ function setDay(index) {
     days = ['Воскресенье', 'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота'];
   }
 
-  if (sessionStorage.lang.toLowerCase() === 'by') {
+  if (sessionStorage.lang.toLowerCase() === 'be') {
     days = ['Нядзеля', 'Панядзелак', 'аўторак', 'серада', 'чацвер', 'Пятніца', 'Субота'];
   }
 
@@ -163,7 +163,7 @@ function dateToTxt(date) {
       ];
     }
 
-    if (sessionStorage.lang.toLowerCase() === 'by') {
+    if (sessionStorage.lang.toLowerCase() === 'be') {
       months = [
         'Студзеня',
         'Лютага',
@@ -235,10 +235,46 @@ function updateData() {
         const weatherData = weatherDataArray[0];
         mainWeatherTemperature.innerHTML = `${Math.round(weatherData.main.temp)}`;
         mainWeatherIcon.style.backgroundImage = `url('http://openweathermap.org/img/wn/${weatherData.weather[0].icon}@2x.png')`;
-        detailsItems[0].innerHTML = weatherData.weather[0].description;
-        detailsItems[1].innerHTML = `feels like: ${Math.round(weatherData.main.feels_like)}°`;
-        detailsItems[2].innerHTML = `wind: ${Math.round(weatherData.wind.speed)} m/s`;
-        detailsItems[3].innerHTML = `Humidity:  ${Math.round(weatherData.main.humidity)}%`;
+
+        const beWeatherDescription = {
+          '01d': 'яснае неба',
+          '02d': 'некалькі аблокаў',
+          '03d': 'раскіданыя хмары',
+          '04d': 'разбітыя хмары',
+          '09d': 'ліўневы дождж',
+          '010d': 'дождж',
+          '011d': 'навальніца',
+          '013d': 'снег',
+          '50d': 'туман',
+          '01n': 'яснае неба',
+          '02n': 'некалькі аблокаў',
+          '03n': 'раскіданыя хмары',
+          '04n': 'разбітыя хмары',
+          '09n': 'ліўневы дождж',
+          '010n': 'дождж',
+          '011n': 'навальніца',
+          '013n': 'снег',
+          '50n': 'туман',
+        };
+
+        if (sessionStorage.lang === 'en' || sessionStorage.lang === 'ru') {
+          detailsItems[0].innerHTML = weatherData.weather[0].description;
+        }
+
+        if (sessionStorage.lang === 'be') {
+          const iconCode = weatherData.weather[0].icon;
+          detailsItems[0].innerHTML = `${beWeatherDescription[iconCode]}`;
+        }
+
+
+        const feelsLike = { en: 'feels like:', ru: 'чувствуется как:', be: 'адчуваецца як:' };
+        const wind = { en: 'wind: ', ru: 'ветер:', be: 'вецер:' };
+        const windMS = { en: 'm/s', ru: 'м/c', be: 'м/c' };
+        const humidity = { en: 'HUMIDITY: ', ru: 'влажность:', be: 'вільготнасць:' };
+
+        detailsItems[1].innerHTML = `${feelsLike[sessionStorage.lang]} ${Math.round(weatherData.main.feels_like)}°`;
+        detailsItems[2].innerHTML = `${wind[sessionStorage.lang]} ${Math.round(weatherData.wind.speed)} ${windMS[sessionStorage.lang]}`;
+        detailsItems[3].innerHTML = `${humidity[sessionStorage.lang]}  ${Math.round(weatherData.main.humidity)}%`;
 
         // 3 days forecast
         const curHours = `${weatherDataArray[0].dt_txt[11]}${weatherDataArray[0].dt_txt[12]}`;
@@ -291,8 +327,11 @@ function updateData() {
           if (sessionStorage.latitude !== undefined && sessionStorage.longitude !== undefined) {
             /* eslint-disable no-unused-vars */
             /* eslint-disable no-undef */
-            geoInfoLatitude.innerHTML = `Latitude: ${sessionStorage.latitude.slice(0, 2)}°${sessionStorage.latitude.slice(3, 5)}'`;
-            geoInfoLongitude.innerHTML = `Longitude: ${sessionStorage.longitude.slice(0, 2)}°${sessionStorage.longitude.slice(3, 5)}'`;
+
+            const latitude = { en: 'Latitude:', ru: 'Широта:', be: 'Шырата:' };
+            const longitude = { en: 'Longitude:', ru: 'Долгота:', be: 'даўгата:' };
+            geoInfoLatitude.innerHTML = `${latitude[sessionStorage.lang]} ${sessionStorage.latitude.slice(0, 2)}°${sessionStorage.latitude.slice(3, 5)}'`;
+            geoInfoLongitude.innerHTML = `${longitude[sessionStorage.lang]} ${sessionStorage.longitude.slice(0, 2)}°${sessionStorage.longitude.slice(3, 5)}'`;
 
             mapboxgl.accessToken = 'pk.eyJ1IjoicmFtcDQiLCJhIjoiY2s0NGJvMGt1MDlpZzNqcDlkNjhkZGd4bSJ9._tcW4OCvJTpC003r3NwMqQ';
             const map = new mapboxgl.Map({
