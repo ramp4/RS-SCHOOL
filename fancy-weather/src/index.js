@@ -1,3 +1,3 @@
-import './BasicLayout';
+import './basicLayout';
 import './firstLoad';
 import './dynamicLayout';

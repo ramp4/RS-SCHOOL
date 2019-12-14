@@ -7,7 +7,10 @@
     "cors": "^2.8.5",
     "cors-anywhere": "^0.4.1",
     "country-list": "^2.2.0",
-    "webpack": "^4.41.2"
+    "postal-code": "0.0.5",
+    "webpack": "^4.41.2",
+    "zipcode": "^0.1.1",
+    "zipcodes": "^8.0.0"
   },
   "devDependencies": {
     "eslint": "^6.6.0",

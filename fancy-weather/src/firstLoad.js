@@ -26,7 +26,6 @@ sessionStorage.setItem('lang', 'en');
 function getWeatherData(city, lang) {
   const url = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&lang=${lang}&cnt=32&units=metric&APPID=df773d568696e244bf0864cd6367d9c5`;
 
-  // const url = `https://api.openweathermap.org/data/2.5/forecast?q=Minsk&lang=${lang}&cnt=32&units=metric&APPID=df773d568696e244bf0864cd6367d9c5`;
   return fetch(url)
     .then((response) => response.json());
 }
@@ -131,8 +130,6 @@ function getBG(weather) {
 const tryGetWeatherData = setInterval(() => {
   if (sessionStorage.city !== undefined && sessionStorage.lang !== undefined) {
     getWeatherData(sessionStorage.city, sessionStorage.lang).then((result) => {
-      console.log(result);
-
       sessionStorage.setItem('timezone', result.city.timezone);
       currentDateConstructor();
 
