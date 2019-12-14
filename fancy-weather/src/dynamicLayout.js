@@ -60,3 +60,23 @@ for (let i = 0; i < 2; i += 1) {
     }
   });
 }
+
+
+// _________________________search row________________________
+
+
+const searchRowField = document.querySelector('.search-row__field');
+
+searchRowField.addEventListener('focus', function clearSearchRowField() {
+  if (searchRowField.value === 'Search city or ZIP') {
+    searchRowField.value = '';
+  }
+  searchRowField.removeEventListener('focus', clearSearchRowField());
+});
+
+searchRowField.addEventListener('blur', function clearSearchRowField() {
+  if (searchRowField.value === '') {
+    searchRowField.value = 'Search city or ZIP';
+  }
+  searchRowField.removeEventListener('blur', clearSearchRowField());
+});
