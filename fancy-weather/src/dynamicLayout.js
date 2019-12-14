@@ -62,21 +62,30 @@ for (let i = 0; i < 2; i += 1) {
 }
 
 
-// _________________________search row________________________
-
+// _________________________search row field _______________________
 
 const searchRowField = document.querySelector('.search-row__field');
 
-searchRowField.addEventListener('focus', function clearSearchRowField() {
+searchRowField.addEventListener('focus', () => {
   if (searchRowField.value === 'Search city or ZIP') {
     searchRowField.value = '';
   }
-  searchRowField.removeEventListener('focus', clearSearchRowField());
 });
 
-searchRowField.addEventListener('blur', function clearSearchRowField() {
+searchRowField.addEventListener('blur', () => {
   if (searchRowField.value === '') {
     searchRowField.value = 'Search city or ZIP';
   }
-  searchRowField.removeEventListener('blur', clearSearchRowField());
+});
+
+
+// _________________________search button________________________
+
+
+const searchRowButton = document.querySelector('.search-row__button');
+
+searchRowButton.addEventListener('click', () => {
+  if (searchRowField.value !== 'Search city or ZIP') {
+    console.log(searchRowField.value);
+  }
 });
