@@ -16,7 +16,7 @@ const forecastItemIconArray = document.getElementsByClassName('forecast-item__ic
 function getLocationData() {
   const url = 'https://ipinfo.io/json?token=08f12254167956';
   return fetch(url).then((result) => {
-    if (result.ok) sessionStorage.gotData = true;
+    if (result.ok) sessionStorage.gotLocationData = true;
     return result.json();
   });
 }
@@ -52,7 +52,7 @@ getLocationData().then((locationData) => {
 console.log(sessionStorage);
 
 const tryGetTimezone = setInterval(() => {
-  if (sessionStorage.gotData) {
+  if (sessionStorage.gotLocationData) {
     getWeatherData(sessionStorage.city, sessionStorage.lang).then((data) => {
       sessionStorage.setItem('timezone', data.city.timezone);
       clearTimeout(tryGetTimezone);
@@ -100,30 +100,32 @@ function dateToTxt(date) {
 
 function getCurrentDate() {
   const currentDate = new Date(Date.now() - sessionStorage.timezone * 1000);
-
   return currentDate;
 }
 
-infoDate.innerHTML = dateToTxt(getCurrentDate());
 
-let refreshDate = function refreshDateFunction() {
-  let updatedDate = getCurrentDate();
-  const seconds = updatedDate.getSeconds();
-  if (seconds === 0) {
-    infoDate.innerHTML = dateToTxt(updatedDate);
-    setInterval(() => {
-      updatedDate = getCurrentDate();
+function currentDateConstructor() {
+  infoDate.innerHTML = dateToTxt(getCurrentDate());
+
+  let refreshDate = function refreshDateFunction() {
+    let updatedDate = getCurrentDate();
+    const seconds = updatedDate.getSeconds();
+    if (seconds === 0) {
       infoDate.innerHTML = dateToTxt(updatedDate);
-    }, 60000);
-    refreshDate = null;
-    return;
-  }
-  setTimeout(() => {
-    refreshDate();
-  }, 500);
-};
+      setInterval(() => {
+        updatedDate = getCurrentDate();
+        infoDate.innerHTML = dateToTxt(updatedDate);
+      }, 60000);
+      refreshDate = null;
+      return;
+    }
+    setTimeout(() => {
+      refreshDate();
+    }, 500);
+  };
 
-refreshDate();
+  refreshDate();
+}
 
 // _________________________background image_________________________
 
@@ -135,12 +137,13 @@ function getBG(weather) {
 }
 
 
-// _________________________weather_________________________;
+// _________________________weather/date_________________________;
 
 
 const tryGetWeatherData = setInterval(() => {
-  if (sessionStorage.gotData) {
+  if (sessionStorage.gotLocationData) {
     getWeatherData(sessionStorage.city, sessionStorage.lang).then((result) => {
+      currentDateConstructor();
       const weatherDataArray = result.list;
 
       const weatherData = weatherDataArray[0];
@@ -172,4 +175,4 @@ const tryGetWeatherData = setInterval(() => {
     });
     clearTimeout(tryGetWeatherData);
   }
-}, 1000);
+}, 100);
