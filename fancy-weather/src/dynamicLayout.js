@@ -172,8 +172,6 @@ function updateData() {
   const tryGetWeatherData = setInterval(() => {
     if (sessionStorage.city !== undefined && sessionStorage.lang !== undefined) {
       getWeatherData(sessionStorage.city, sessionStorage.lang).then((result) => {
-        console.log(result);
-
         sessionStorage.setItem('timezone', result.city.timezone);
         currentDateConstructor();
 
@@ -231,6 +229,7 @@ function updateData() {
         }
 
         function error(err) {
+          // eslint-disable-next-line no-console
           console.warn(`ERROR(${err.code}): ${err.message}`);
         }
 
@@ -370,4 +369,26 @@ searchRowButton.addEventListener('click', () => {
     sessionStorage.city = value;
     updateData();
   }
+});
+
+function pressedEnter(event) {
+  let { value } = searchRowField;
+  if (event.code === 'Enter') {
+    if (zipcodes.lookup(value)) {
+      value = zipcodes.lookup(value).city;
+    }
+    sessionStorage.city = value;
+    updateData();
+  }
+}
+
+searchRowField.addEventListener('focus', () => {
+  const { value } = searchRowField;
+  if (value !== 'Search city or ZIP' && value !== '') {
+    document.addEventListener('keydown', pressedEnter);
+  }
+});
+
+searchRowField.addEventListener('blur', () => {
+  document.removeEventListener('keydown', pressedEnter);
 });

@@ -45,7 +45,6 @@ getLocationData().then((locationData) => {
 
 
 // _________________________date_________________________
-console.log(sessionStorage);
 
 
 function setDay(index) {
@@ -188,6 +187,7 @@ function success(pos) {
 }
 
 function error(err) {
+  // eslint-disable-next-line no-console
   console.warn(`ERROR(${err.code}): ${err.message}`);
 }
 
