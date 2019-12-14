@@ -104,9 +104,22 @@ function setDay(index) {
   if (i > 6) {
     i -= 7;
   }
-  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  let days;
+  if (sessionStorage.lang.toLowerCase() === 'en') {
+    days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  }
+
+  if (sessionStorage.lang.toLowerCase() === 'ru') {
+    days = ['Воскресенье', 'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота'];
+  }
+
+  if (sessionStorage.lang.toLowerCase() === 'by') {
+    days = ['Нядзеля', 'Панядзелак', 'аўторак', 'серада', 'чацвер', 'Пятніца', 'Субота'];
+  }
+
   return days[i];
 }
+
 function getCurrentDate() {
   const currentDate = new Date(Date.now((Date.UTC) - sessionStorage.timezone * 1000));
   return currentDate;
@@ -114,21 +127,59 @@ function getCurrentDate() {
 
 
 function dateToTxt(date) {
+  let months;
   function setMonth(index) {
-    const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
+    if (sessionStorage.lang.toLowerCase() === 'en') {
+      months = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+      ];
+    }
+
+    if (sessionStorage.lang.toLowerCase() === 'ru') {
+      months = [
+        'Января',
+        'Февраля',
+        'Марта',
+        'Апреля',
+        'Мая',
+        'Июня',
+        'Июля',
+        'Августа',
+        'Сентября',
+        'Октября',
+        'Ноября',
+        'Декабря',
+      ];
+    }
+
+    if (sessionStorage.lang.toLowerCase() === 'by') {
+      months = [
+        'Студзеня',
+        'Лютага',
+        'Сакавіка',
+        'Красавіка',
+        'Мая',
+        'Чэрвеня',
+        'Ліпеня',
+        'Жніўня',
+        'Верасня',
+        'Кастрычніка',
+        'Лістапад',
+        'Сьнежня',
+      ];
+    }
+
     return months[index];
   }
 
@@ -172,6 +223,7 @@ function updateData() {
   const tryGetWeatherData = setInterval(() => {
     if (sessionStorage.city !== undefined && sessionStorage.lang !== undefined) {
       getWeatherData(sessionStorage.city, sessionStorage.lang).then((result) => {
+        console.log(result);
         sessionStorage.setItem('timezone', result.city.timezone);
         currentDateConstructor();
 
@@ -373,7 +425,7 @@ searchRowButton.addEventListener('click', () => {
 
 function pressedEnter(event) {
   let { value } = searchRowField;
-  if (event.code === 'Enter') {
+  if (event.code === 'Enter' && value !== 'Search city or ZIP' && value !== '') {
     if (zipcodes.lookup(value)) {
       value = zipcodes.lookup(value).city;
     }
@@ -383,10 +435,7 @@ function pressedEnter(event) {
 }
 
 searchRowField.addEventListener('focus', () => {
-  const { value } = searchRowField;
-  if (value !== 'Search city or ZIP' && value !== '') {
-    document.addEventListener('keydown', pressedEnter);
-  }
+  document.addEventListener('keydown', pressedEnter);
 });
 
 searchRowField.addEventListener('blur', () => {
