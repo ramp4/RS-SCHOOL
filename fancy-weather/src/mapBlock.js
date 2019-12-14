@@ -1,3 +1,6 @@
+const geoInfoLatitude = document.querySelector('.geo-info__latitude');
+const geoInfoLongitude = document.querySelector('.geo-info__longitude');
+
 
 const options = {
   enableHighAccuracy: true,
@@ -21,6 +24,8 @@ const tryGetMap = setInterval(() => {
   if (sessionStorage.latitude !== undefined) {
     /* eslint-disable no-unused-vars */
     /* eslint-disable no-undef */
+    geoInfoLatitude.innerHTML = `Latitude: ${sessionStorage.latitude.slice(0, 2)}°${sessionStorage.latitude.slice(3, 5)}'`;
+    geoInfoLongitude.innerHTML = `Longitude: ${sessionStorage.longitude.slice(0, 2)}°${sessionStorage.longitude.slice(3, 5)}'`;
 
     mapboxgl.accessToken = 'pk.eyJ1IjoicmFtcDQiLCJhIjoiY2s0NGJvMGt1MDlpZzNqcDlkNjhkZGd4bSJ9._tcW4OCvJTpC003r3NwMqQ';
     const map = new mapboxgl.Map({
