@@ -1,3 +1,2 @@
 import './BasicLayout';
-import './weatherBlock';
-import './mapBlock';
+import './firstLoad';
