@@ -97,7 +97,7 @@ const section2 = document.createElement('section');
 section2.className = 'section-2';
 main.append(section2);
 
-section2.insertAdjacentHTML('afterbegin', '<div id="map"></div><div class="geo-info"></div>');
+section2.insertAdjacentHTML('afterbegin', '<div class="map-container"><div id="map"></div></div><div class="geo-info"></div>');
 
 const geoInfo = document.querySelector('.geo-info');
 geoInfo.insertAdjacentHTML('afterbegin', '<span class="geo-info__latitude"></span><span class="geo-info__longitude"></span>');
