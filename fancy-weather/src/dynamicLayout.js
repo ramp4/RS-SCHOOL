@@ -32,7 +32,7 @@ async function getWeatherData(city, lang) {
   let cityEn = city;
   let units = 'metric';
   if (sessionStorage.tType === 'Fahrenheit') { units = 'imperial'; }
-  if (sessionStorage.lang !== 'en') {
+  if (sessionStorage.lang === 'be') {
     cityEn = await translate(city, { from: sessionStorage.lang, to: 'en' });
   }
   const url = `https://api.openweathermap.org/data/2.5/forecast?q=${cityEn}&lang=${lang}&cnt=32&units=${units}&APPID=df773d568696e244bf0864cd6367d9c5`;
@@ -258,12 +258,17 @@ function updateData() {
     if (sessionStorage.city !== undefined && sessionStorage.lang !== undefined) {
       getWeatherData(sessionStorage.city, sessionStorage.lang).then((result) => {
         if (result.message) {
-          const alertsArray = { en: 'City not found', ru: 'Город не найден', be: 'горад не знойдзены' };
+          const alertsArray = {
+            en: 'City not found, enter the correct city name (try enter the international English name)',
+            ru: 'Город не найден, введите корректное название (попробуйте ввести английское международное название города)',
+            be: 'Горад не знойдзен, увядзіце каррэктную назву (паспрабуйце ўкласці ангельскае міжнароднае назву горада)',
+          };
           alert(alertsArray[sessionStorage.lang]);
           return;
         }
         sessionStorage.setItem('timezone', result.city.timezone);
         currentDateConstructor();
+
 
         infoLocation.innerHTML = `${result.city.name}, ${getName(result.city.country)}`;
 
