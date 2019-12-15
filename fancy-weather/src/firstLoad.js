@@ -88,12 +88,9 @@ function getWeatherData(city, lang) {
 getLocationData().then((locationData) => {
   infoLocation.innerHTML = `${locationData.city}, ${getName(locationData.country)}`;
 
-
   translate(infoLocation.innerHTML, sessionStorage.lang).then((data) => {
     infoLocation.innerHTML = data;
   });
-
-
   sessionStorage.setItem('city', locationData.city);
   sessionStorage.setItem('tType', 'Celsius');
   const latitude = locationData.loc.slice(0, 7);

@@ -18,6 +18,7 @@ const detailsItems = document.getElementsByClassName('details__item');
 const forecastItemDayArray = document.getElementsByClassName('forecast-item__day');
 const forecastItemTemperatureArray = document.getElementsByClassName('forecast-item__temperature');
 const forecastItemIconArray = document.getElementsByClassName('forecast-item__icon');
+const searchRowField = document.querySelector('.search-row__field');
 
 function getBG(weather) {
   const url = `https://api.unsplash.com/photos/random?orientation=landscape&per_page=1&query=${weather}order_by=popular&client_id=09ade6d49c5651607a93d8183e34f5f6ba29411e9e3ef2388640614d25a3a986`;
@@ -27,9 +28,10 @@ function getBG(weather) {
 }
 
 
-function getWeatherData(city, lang) {
+async function getWeatherData(city, lang) {
   let units = 'metric';
   if (sessionStorage.tType === 'Fahrenheit') { units = 'imperial'; }
+
   const url = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&lang=${lang}&cnt=32&units=${units}&APPID=df773d568696e244bf0864cd6367d9c5`;
 
   return fetch(url)
@@ -91,17 +93,17 @@ for (let i = 0; i < 2; i += 1) {
 
 // _________________________search row field _______________________
 
-const searchRowField = document.querySelector('.search-row__field');
 
 searchRowField.addEventListener('focus', () => {
-  if (searchRowField.value === 'Search city or ZIP') {
+  if (searchRowField.value !== 'Search city or ZIP' || searchRowField.value !== 'Поиск города или ZIP' || searchRowField.value !== 'Пошук горада ці ZIP') {
     searchRowField.value = '';
   }
 });
 
 searchRowField.addEventListener('blur', () => {
   if (searchRowField.value === '') {
-    searchRowField.value = 'Search city or ZIP';
+    const searchRowFieldLangs = { en: 'Search city or ZIP', ru: 'Поиск города или ZIP', be: 'Пошук горада ці ZIP' };
+    searchRowField.value = searchRowFieldLangs[sessionStorage.lang];
   }
 });
 
@@ -242,6 +244,11 @@ function updateData() {
   if (sessionStorage.lang === 'be') {
     searchRowField.value = 'Пошук горада ці ZIP';
     searchRowButton.innerHTML = 'Знайсці';
+  }
+
+  if (sessionStorage.lang === 'en') {
+    searchRowField.value = 'Search city or ZIP';
+    searchRowButton.innerHTML = 'search';
   }
 
   const tryGetWeatherData = setInterval(() => {
@@ -482,7 +489,7 @@ function updateData() {
 
 searchRowButton.addEventListener('click', () => {
   let { value } = searchRowField;
-  if (searchRowField.value !== 'Search city or ZIP') {
+  if (searchRowField.value !== 'Search city or ZIP' && searchRowField.value !== 'Поиск города или ZIP' && searchRowField.value !== 'Пошук горада ці ZIP') {
     if (zipcodes.lookup(value)) {
       value = zipcodes.lookup(value).city;
     }
@@ -493,7 +500,7 @@ searchRowButton.addEventListener('click', () => {
 
 function pressedEnter(event) {
   let { value } = searchRowField;
-  if (event.code === 'Enter' && value !== 'Search city or ZIP' && value !== '') {
+  if (event.code === 'Enter' && value !== 'Search city or ZIP' && searchRowField.value !== 'Поиск города или ZIP' && searchRowField.value !== 'Пошук горада ці ZIP' && value !== '') {
     if (zipcodes.lookup(value)) {
       value = zipcodes.lookup(value).city;
     }
