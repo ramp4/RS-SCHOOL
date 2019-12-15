@@ -60,8 +60,11 @@ body {
   cursor: pointer;
 }
 
+.button-row__refresh-button:hover {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
 .lang-switcher {
-  height: 3.15vw;
   width: 4.93vw;
   min-width: 71px;
   min-height: 44px;
@@ -74,10 +77,11 @@ body {
   display: flex;
   flex-flow: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  z-index: 1;
 }
 
-.lang-switcher::after {
+.lang-switcher__arrow {
   content: "";
   background-image: url(./dist/assets/langButtonArrow.svg);
   height: 22%;
@@ -87,9 +91,14 @@ body {
   background-size: 100%;
   background-position: center;
   background-repeat: no-repeat;
-  position: absolute;
   top: 40%;
-  right: 15%;
+  right: 10%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  position: absolute;
+  z-index: -1;
 }
 
 
@@ -102,13 +111,29 @@ body {
   color: #FFFFFF;
   list-style: none;
   display: none;
-  margin-left: -10%;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  height: 3.15vw;
+  width: 100%;
+  color: rgba(255, 255, 255, 0.4);
+  order: 1;
 }
 
 
+.lang-switcher__item:hover {
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 0.35rem;
+}
+
 .lang-switcher__item_current {
-  display: block;
+  display: flex;
+  color: white;
   order: 0;
+}
+
+.lang-switcher__item_visible {
+  display: flex;
 }
 
 
@@ -141,21 +166,30 @@ body {
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.4);
   text-align: center;
-
 }
+
+
 
 .temperature-switcher__item_celsius {
   border-radius: 0 0.35rem 0.35rem 0;
 }
 
+.temperature-switcher:hover {
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 0.35rem;
+}
+
+
 .temperature-switcher__item_fahrenheit {
   border-radius: 0.35rem 0 0 0.35rem;
 }
+
 
 .temperature-switcher__item_current {
   background: rgba(174, 181, 185, 0.5);
   color: #FFFFFF;
 }
+
 
 .search-row {
   height: 100%;
@@ -193,12 +227,18 @@ body {
   width: 1.39vw;
   min-height: 17px;
   min-width: 17px;
-  background-image: url(./dist/assets/microphone.svg);
+  background: url(./dist/assets/microphone.svg);
   background-repeat: no-repeat;
   background-size: 100%;
   background-position: center;
   left: 65%;
   cursor: pointer;
+}
+
+.search-row__voice-search:hover {
+  height: 1.6vw;
+  width: 1.6vw;
+  left: 64.5%;
 }
 
 .search-row__button {
@@ -219,6 +259,11 @@ body {
   justify-content: center;
   flex-direction: row;
   cursor: pointer;
+}
+
+.search-row__button:hover {
+  background-color: rgba(255, 255, 255, 0.5);
+
 }
 
 .main {
@@ -422,6 +467,4 @@ body {
   text-align: right;
   text-transform: capitalize;
   color: #FFFFFF;
-
-
 }

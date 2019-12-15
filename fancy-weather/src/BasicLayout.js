@@ -15,6 +15,11 @@ buttonRow.append(refreshButton);
 const langSwitcher = document.createElement('ul');
 langSwitcher.className = 'lang-switcher';
 buttonRow.append(langSwitcher);
+
+const langArrow = document.createElement('div');
+langArrow.className = 'lang-switcher__arrow';
+langSwitcher.append(langArrow);
+
 const langArray = new Array(3);
 
 for (let i = 0; i < 3; i += 1) {

@@ -1,3 +1,14 @@
+import translate from 'translate';
+
+// ... include translate
+
+translate.engine = 'yandex';
+translate.key = 'trnsl.1.1.20191215T140755Z.ff0079c14082a29c.1bd8c2aa7294ef463c34f210d29ee889a108ecdd';
+
+
+// ... use translate()
+
+
 const body = document.querySelector('body');
 const infoLocation = document.querySelector('.info__location');
 const infoDate = document.querySelector('.info__date');
@@ -16,7 +27,9 @@ function getBG(weather) {
 }
 
 function getWeatherData(city, lang) {
-  const url = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&lang=${lang}&cnt=32&units=metric&APPID=df773d568696e244bf0864cd6367d9c5`;
+  let units = 'metric';
+  if (sessionStorage.tType === 'Fahrenheit') { units = 'imperial'; }
+  const url = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&lang=${lang}&cnt=32&units=${units}&APPID=df773d568696e244bf0864cd6367d9c5`;
 
   return fetch(url)
     .then((response) => response.json());
@@ -39,7 +52,6 @@ refreshBG.addEventListener('click', () => {
 
 
 // _________________________temperature switcher________________________
-
 function convertTemperature(value) {
   let result;
   if (sessionStorage.tType === 'Celsius') {
@@ -220,14 +232,28 @@ function currentDateConstructor() {
 const { getName } = require('country-list');
 
 function updateData() {
+  if (sessionStorage.lang === 'ru') {
+    searchRowField.value = 'Поиск города или ZIP';
+    searchRowButton.innerHTML = 'Найти';
+  }
+
+  if (sessionStorage.lang === 'be') {
+    searchRowField.value = 'Пошук горада ці ZIP';
+    searchRowButton.innerHTML = 'Знайсці';
+  }
+
   const tryGetWeatherData = setInterval(() => {
     if (sessionStorage.city !== undefined && sessionStorage.lang !== undefined) {
       getWeatherData(sessionStorage.city, sessionStorage.lang).then((result) => {
-        console.log(result);
         sessionStorage.setItem('timezone', result.city.timezone);
         currentDateConstructor();
 
         infoLocation.innerHTML = `${result.city.name}, ${getName(result.city.country)}`;
+
+        translate(infoLocation.innerHTML, sessionStorage.lang).then((data) => {
+          infoLocation.innerHTML = data;
+        });
+
         sessionStorage.setItem('latitude', result.city.coord.lat);
         sessionStorage.setItem('longitude', result.city.coord.lon);
 
@@ -479,4 +505,48 @@ searchRowField.addEventListener('focus', () => {
 
 searchRowField.addEventListener('blur', () => {
   document.removeEventListener('keydown', pressedEnter);
+});
+
+
+// _________________________lang switcher________________________
+
+const langSwitcher = document.querySelector('.lang-switcher');
+const langSwitcherItemArray = document.getElementsByClassName('lang-switcher__item');
+const langSwitcherArrow = document.querySelector('.lang-switcher__arrow');
+
+
+// eslint-disable-next-line no-unused-vars
+function chooseLang(event) {
+  event.stopPropagation();
+  const newLang = event.target.innerHTML.toLowerCase();
+  console.log(newLang);
+  sessionStorage.lang = newLang;
+  updateData();
+
+  const langSwitcherItemCurrent = document.querySelector('.lang-switcher__item_current');
+  langSwitcherItemCurrent.classList.remove('lang-switcher__item_current');
+  event.target.classList.add('lang-switcher__item_current');
+
+
+  for (let j = 0; j < 3; j += 1) {
+    langSwitcherItemArray[j].classList.remove('lang-switcher__item_visible');
+  }
+  langSwitcherArrow.style.display = 'flex';
+
+  for (let j = 0; j < 3; j += 1) {
+    langSwitcherItemArray[j].removeEventListener('click', chooseLang);
+  }
+}
+
+langSwitcher.addEventListener('click', () => {
+  console.log('n');
+
+  for (let i = 0; i < 3; i += 1) {
+    langSwitcherItemArray[i].classList.add('lang-switcher__item_visible');
+  }
+  langSwitcherArrow.style.display = 'none';
+
+  for (let i = 0; i < 3; i += 1) {
+    langSwitcherItemArray[i].addEventListener('click', chooseLang);
+  }
 });

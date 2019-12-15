@@ -1,6 +1,18 @@
 /* eslint-disable max-len */
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-param-reassign */
+
+import translate from 'translate';
+
+// ... include translate
+
+translate.engine = 'yandex';
+translate.key = 'trnsl.1.1.20191215T140755Z.ff0079c14082a29c.1bd8c2aa7294ef463c34f210d29ee889a108ecdd';
+
+
+// ... use translate()
+
+
 const infoLocation = document.querySelector('.info__location');
 const infoDate = document.querySelector('.info__date');
 const mainWeatherTemperature = document.querySelector('.main-weather__temperature');
@@ -21,10 +33,50 @@ function getLocationData() {
 
 const { getName } = require('country-list');
 
-sessionStorage.setItem('lang', 'en');
+function getUserLang() {
+  const language = window.navigator ? (window.navigator.language
+    || window.navigator.systemLanguage
+    || window.navigator.userLanguage) : 'ru';
+  const result = language.substr(0, 2).toLowerCase();
+  return result;
+}
+
+const langSwitcherItemArray = document.getElementsByClassName('lang-switcher__item');
+const langSwitcherItemCurrent = document.querySelector('.lang-switcher__item_current');
+const langSwitcherEN = langSwitcherItemArray[0];
+const langSwitcherRU = langSwitcherItemArray[1];
+const langSwitcherBE = langSwitcherItemArray[2];
+
+const searchRowField = document.querySelector('.search-row__field');
+const searchRowButton = document.querySelector('.search-row__button');
+function setAppLang() {
+  const receivedLang = getUserLang();
+  if (receivedLang === 'ru') {
+    langSwitcherItemCurrent.classList.toggle('lang-switcher__item_current');
+    langSwitcherRU.classList.toggle('lang-switcher__item_current');
+    sessionStorage.lang = receivedLang;
+    searchRowField.value = 'Поиск города или ZIP';
+    searchRowButton.innerHTML = 'Найти';
+    return;
+  }
+  if (receivedLang === 'be') {
+    langSwitcherBE.style.order = '0';
+    sessionStorage.lang = receivedLang;
+    langSwitcherItemCurrent.classList.toggle('lang-switcher__item_current');
+    langSwitcherBE.classList.toggle('lang-switcher__item_current');
+    searchRowButton.innerHTML = 'Знайсці';
+    return;
+  }
+  langSwitcherEN.style.order = '0';
+  sessionStorage.lang = 'en';
+}
+
+setAppLang();
 
 function getWeatherData(city, lang) {
-  const url = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&lang=${lang}&cnt=32&units=metric&APPID=df773d568696e244bf0864cd6367d9c5`;
+  let units = 'metric';
+  if (sessionStorage.tType === 'Fahrenheit') { units = 'imperial'; }
+  const url = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&lang=${lang}&cnt=32&units=${units}&APPID=df773d568696e244bf0864cd6367d9c5`;
 
   return fetch(url)
     .then((response) => response.json());
@@ -35,6 +87,13 @@ function getWeatherData(city, lang) {
 
 getLocationData().then((locationData) => {
   infoLocation.innerHTML = `${locationData.city}, ${getName(locationData.country)}`;
+
+
+  translate(infoLocation.innerHTML, sessionStorage.lang).then((data) => {
+    infoLocation.innerHTML = data;
+  });
+
+
   sessionStorage.setItem('city', locationData.city);
   sessionStorage.setItem('tType', 'Celsius');
   const latitude = locationData.loc.slice(0, 7);
@@ -129,7 +188,7 @@ function dateToTxt(date) {
     if (number < 10) return `0${number}`;
     return number;
   }
-  const result = `${setDay(date.getDay())} ${setZero(date.getDate())} ${setMonth(date.getMonth())} ${setZero(date.getHours())}:${setZero(date.getMinutes())}`;
+  const result = `${setDay(date.getDay())} ${setZero(date.getDate())} ${setMonth(date.getMonth())} ${setZero(date.getHours())}: ${setZero(date.getMinutes())} `;
 
   return result;
 }
@@ -186,7 +245,37 @@ const tryGetWeatherData = setInterval(() => {
       const weatherData = weatherDataArray[0];
       mainWeatherTemperature.innerHTML = `${Math.round(weatherData.main.temp)}`;
       mainWeatherIcon.style.backgroundImage = `url('http://openweathermap.org/img/wn/${weatherData.weather[0].icon}@2x.png')`;
-      detailsItems[0].innerHTML = weatherData.weather[0].description;
+
+      const beWeatherDescription = {
+        '01d': 'яснае неба',
+        '02d': 'некалькі аблокаў',
+        '03d': 'раскіданыя хмары',
+        '04d': 'разбітыя хмары',
+        '09d': 'ліўневы дождж',
+        '010d': 'дождж',
+        '011d': 'навальніца',
+        '013d': 'снег',
+        '50d': 'туман',
+        '01n': 'яснае неба',
+        '02n': 'некалькі аблокаў',
+        '03n': 'раскіданыя хмары',
+        '04n': 'разбітыя хмары',
+        '09n': 'ліўневы дождж',
+        '010n': 'дождж',
+        '011n': 'навальніца',
+        '013n': 'снег',
+        '50n': 'туман',
+      };
+
+      if (sessionStorage.lang === 'en' || sessionStorage.lang === 'ru') {
+        detailsItems[0].innerHTML = weatherData.weather[0].description;
+      }
+
+      if (sessionStorage.lang === 'be') {
+        const iconCode = weatherData.weather[0].icon;
+        detailsItems[0].innerHTML = `${beWeatherDescription[iconCode]}`;
+      }
+
 
       const feelsLike = { en: 'feels like:', ru: 'чувствуется как:', be: 'адчуваецца як:' };
       const wind = { en: 'wind: ', ru: 'ветер:', be: 'вецер:' };
