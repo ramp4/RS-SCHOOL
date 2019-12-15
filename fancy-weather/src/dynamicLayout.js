@@ -29,10 +29,13 @@ function getBG(weather) {
 
 
 async function getWeatherData(city, lang) {
+  let cityEn = city;
   let units = 'metric';
   if (sessionStorage.tType === 'Fahrenheit') { units = 'imperial'; }
-
-  const url = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&lang=${lang}&cnt=32&units=${units}&APPID=df773d568696e244bf0864cd6367d9c5`;
+  if (sessionStorage.lang !== 'en') {
+    cityEn = await translate(city, { from: sessionStorage.lang, to: 'en' });
+  }
+  const url = `https://api.openweathermap.org/data/2.5/forecast?q=${cityEn}&lang=${lang}&cnt=32&units=${units}&APPID=df773d568696e244bf0864cd6367d9c5`;
 
   return fetch(url)
     .then((response) => response.json());
@@ -254,6 +257,11 @@ function updateData() {
   const tryGetWeatherData = setInterval(() => {
     if (sessionStorage.city !== undefined && sessionStorage.lang !== undefined) {
       getWeatherData(sessionStorage.city, sessionStorage.lang).then((result) => {
+        if (result.message) {
+          const alertsArray = { en: 'City not found', ru: 'Город не найден', be: 'горад не знойдзены' };
+          alert(alertsArray[sessionStorage.lang]);
+          return;
+        }
         sessionStorage.setItem('timezone', result.city.timezone);
         currentDateConstructor();
 
