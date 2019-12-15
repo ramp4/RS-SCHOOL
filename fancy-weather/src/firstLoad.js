@@ -302,6 +302,7 @@ const tryGetWeatherData = setInterval(() => {
         body.style.backgroundImage = `linear-gradient(180deg, rgba(8, 15, 26, 0.59) 0%, rgba(17, 17, 46, 0.46) 100%),
         url('${background}')`;
       }).catch(() => {
+        console.log('Exceeded the number of background image requests (50 / hour)');
         body.style.backgroundColor = 'black';
       });
     });

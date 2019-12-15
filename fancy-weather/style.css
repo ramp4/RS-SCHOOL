@@ -227,7 +227,7 @@ body {
   width: 1.39vw;
   min-height: 17px;
   min-width: 17px;
-  background: url(./dist/assets/microphone.svg);
+  background-image: url(./dist/assets/microphone.svg);
   background-repeat: no-repeat;
   background-size: 100%;
   background-position: center;

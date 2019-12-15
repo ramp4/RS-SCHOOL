@@ -26,6 +26,7 @@ function getBG(weather) {
     .then((data) => data.urls.regular);
 }
 
+
 function getWeatherData(city, lang) {
   let units = 'metric';
   if (sessionStorage.tType === 'Fahrenheit') { units = 'imperial'; }
@@ -46,6 +47,7 @@ refreshBG.addEventListener('click', () => {
     body.style.backgroundImage = `linear-gradient(180deg, rgba(8, 15, 26, 0.59) 0%, rgba(17, 17, 46, 0.46) 100%),
         url('${background}')`;
   }).catch(() => {
+    console.log('Exceeded the number of background image requests (50 / hour)');
     body.style.backgroundColor = 'black';
   });
 });
@@ -318,6 +320,7 @@ function updateData() {
           body.style.backgroundImage = `linear-gradient(180deg, rgba(8, 15, 26, 0.59) 0%, rgba(17, 17, 46, 0.46) 100%),
         url('${background}')`;
         }).catch(() => {
+          console.log('Exceeded the number of background image requests (50 / hour)');
           body.style.backgroundColor = 'black';
         });
 
@@ -519,7 +522,6 @@ const langSwitcherArrow = document.querySelector('.lang-switcher__arrow');
 function chooseLang(event) {
   event.stopPropagation();
   const newLang = event.target.innerHTML.toLowerCase();
-  console.log(newLang);
   sessionStorage.lang = newLang;
   updateData();
 
@@ -539,8 +541,6 @@ function chooseLang(event) {
 }
 
 langSwitcher.addEventListener('click', () => {
-  console.log('n');
-
   for (let i = 0; i < 3; i += 1) {
     langSwitcherItemArray[i].classList.add('lang-switcher__item_visible');
   }
