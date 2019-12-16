@@ -67,9 +67,9 @@ function convertTemperature(value) {
   if (sessionStorage.tType === 'Celsius') {
     result = Math.round((value * 9) / 5 + 32);
   } else
-  if (sessionStorage.tType === 'Fahrenheit') {
-    return Math.round(((value - 32) * 5) / 9);
-  }
+    if (sessionStorage.tType === 'Fahrenheit') {
+      return Math.round(((value - 32) * 5) / 9);
+    }
   return result;
 }
 
@@ -89,7 +89,6 @@ for (let i = 0; i < 2; i += 1) {
 
     for (let j = 0; j < 3; j += 1) {
       value = forecastItemTemperatureArray[j].innerHTML;
-      console.log(value);
       forecastItemTemperatureArray[j].innerHTML = `${convertTemperature(value)}`;
     }
     if (sessionStorage.tType === 'Fahrenheit') { sessionStorage.tType = 'Celsius'; } else if (sessionStorage.tType === 'Celsius') { sessionStorage.tType = 'Fahrenheit'; }
@@ -533,7 +532,6 @@ function chooseLang(event) {
   const daysForTranslate = [forecastItemDayArray[0], forecastItemDayArray[1], forecastItemDayArray[2]];
 
   for (let i = 0; i < 3; i += 1) {
-    console.log(+sessionStorage.curDay + i);
     daysForTranslate[i].innerHTML = setDay(sessionStorage.curDay + i);
   }
 
