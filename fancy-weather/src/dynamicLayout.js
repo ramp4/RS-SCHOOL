@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import translate from 'translate';
 
 // ... include translate
@@ -19,6 +20,8 @@ const forecastItemDayArray = document.getElementsByClassName('forecast-item__day
 const forecastItemTemperatureArray = document.getElementsByClassName('forecast-item__temperature');
 const forecastItemIconArray = document.getElementsByClassName('forecast-item__icon');
 const searchRowField = document.querySelector('.search-row__field');
+const geoInfoLatitude = document.querySelector('.geo-info__latitude');
+const geoInfoLongitude = document.querySelector('.geo-info__longitude');
 
 function getBG(weather) {
   const url = `https://api.unsplash.com/photos/random?orientation=landscape&per_page=1&query=${weather}order_by=popular&client_id=09ade6d49c5651607a93d8183e34f5f6ba29411e9e3ef2388640614d25a3a986`;
@@ -62,11 +65,9 @@ refreshBG.addEventListener('click', () => {
 function convertTemperature(value) {
   let result;
   if (sessionStorage.tType === 'Celsius') {
-    sessionStorage.tType = 'Fahrenheit';
     result = Math.round((value * 9) / 5 + 32);
   } else
   if (sessionStorage.tType === 'Fahrenheit') {
-    sessionStorage.tType = 'Celsius';
     return Math.round(((value - 32) * 5) / 9);
   }
   return result;
@@ -88,8 +89,10 @@ for (let i = 0; i < 2; i += 1) {
 
     for (let j = 0; j < 3; j += 1) {
       value = forecastItemTemperatureArray[j].innerHTML;
+      console.log(value);
       forecastItemTemperatureArray[j].innerHTML = `${convertTemperature(value)}`;
     }
+    if (sessionStorage.tType === 'Fahrenheit') { sessionStorage.tType = 'Celsius'; } else if (sessionStorage.tType === 'Celsius') { sessionStorage.tType = 'Fahrenheit'; }
   });
 }
 
@@ -141,6 +144,7 @@ function setDay(index) {
 
 function getCurrentDate() {
   const currentDate = new Date(Date.now((Date.UTC) - sessionStorage.timezone * 1000));
+  sessionStorage.curDay = currentDate.getDay();
   return currentDate;
 }
 
@@ -238,7 +242,7 @@ function currentDateConstructor() {
 // update weather
 const { getName } = require('country-list');
 
-function updateData() {
+async function updateData() {
   if (sessionStorage.lang === 'ru') {
     searchRowField.value = 'Поиск города или ZIP';
     searchRowButton.innerHTML = 'Найти';
@@ -254,251 +258,215 @@ function updateData() {
     searchRowButton.innerHTML = 'search';
   }
 
-  const tryGetWeatherData = setInterval(() => {
-    if (sessionStorage.city !== undefined && sessionStorage.lang !== undefined) {
-      getWeatherData(sessionStorage.city, sessionStorage.lang).then((result) => {
-        if (result.message) {
-          const alertsArray = {
-            en: 'City not found, enter the correct city name (try enter the international English name)',
-            ru: 'Город не найден, введите корректное название (попробуйте ввести английское международное название города)',
-            be: 'Горад не знойдзен, увядзіце каррэктную назву (паспрабуйце ўкласці ангельскае міжнароднае назву горада)',
-          };
-          alert(alertsArray[sessionStorage.lang]);
-          return;
-        }
-        sessionStorage.setItem('timezone', result.city.timezone);
-        currentDateConstructor();
-
-
-        infoLocation.innerHTML = `${result.city.name}, ${getName(result.city.country)}`;
-
-        translate(infoLocation.innerHTML, sessionStorage.lang).then((data) => {
-          infoLocation.innerHTML = data;
-        });
-
-        sessionStorage.setItem('latitude', result.city.coord.lat);
-        sessionStorage.setItem('longitude', result.city.coord.lon);
-
-        const weatherDataArray = result.list;
-        const weatherData = weatherDataArray[0];
-        mainWeatherTemperature.innerHTML = `${Math.round(weatherData.main.temp)}`;
-        mainWeatherIcon.style.backgroundImage = `url('http://openweathermap.org/img/wn/${weatherData.weather[0].icon}@2x.png')`;
-
-        const beWeatherDescription = {
-          '01d': 'яснае неба',
-          '02d': 'некалькі аблокаў',
-          '03d': 'раскіданыя хмары',
-          '04d': 'разбітыя хмары',
-          '09d': 'ліўневы дождж',
-          '010d': 'дождж',
-          '011d': 'навальніца',
-          '013d': 'снег',
-          '50d': 'туман',
-          '01n': 'яснае неба',
-          '02n': 'некалькі аблокаў',
-          '03n': 'раскіданыя хмары',
-          '04n': 'разбітыя хмары',
-          '09n': 'ліўневы дождж',
-          '010n': 'дождж',
-          '011n': 'навальніца',
-          '013n': 'снег',
-          '50n': 'туман',
-        };
-
-        if (sessionStorage.lang === 'en' || sessionStorage.lang === 'ru') {
-          detailsItems[0].innerHTML = weatherData.weather[0].description;
-        }
-
-        if (sessionStorage.lang === 'be') {
-          const iconCode = weatherData.weather[0].icon;
-          detailsItems[0].innerHTML = `${beWeatherDescription[iconCode]}`;
-        }
-
-
-        const feelsLike = { en: 'feels like:', ru: 'чувствуется как:', be: 'адчуваецца як:' };
-        const wind = { en: 'wind: ', ru: 'ветер:', be: 'вецер:' };
-        const windMS = { en: 'm/s', ru: 'м/c', be: 'м/c' };
-        const humidity = { en: 'HUMIDITY: ', ru: 'влажность:', be: 'вільготнасць:' };
-
-        detailsItems[1].innerHTML = `${feelsLike[sessionStorage.lang]} ${Math.round(weatherData.main.feels_like)}°`;
-        detailsItems[2].innerHTML = `${wind[sessionStorage.lang]} ${Math.round(weatherData.wind.speed)} ${windMS[sessionStorage.lang]}`;
-        detailsItems[3].innerHTML = `${humidity[sessionStorage.lang]}  ${Math.round(weatherData.main.humidity)}%`;
-
-        // 3 days forecast
-        const curHours = `${weatherDataArray[0].dt_txt[11]}${weatherDataArray[0].dt_txt[12]}`;
-        let nextDayIndex = (24 - curHours + 12) / 3;
-
-        for (let i = 0; i < 3; i += 1) {
-          forecastItemDayArray[i].innerHTML = `${setDay(getCurrentDate().getDay() + i + 1)}`;
-          forecastItemTemperatureArray[i].innerHTML = `${Math.round(weatherDataArray[nextDayIndex].main.temp)}`;
-          forecastItemIconArray[i].style.backgroundImage = `url('http://openweathermap.org/img/wn/${weatherDataArray[nextDayIndex].weather[0].icon}@2x.png')`;
-          nextDayIndex += 8;
-        }
-
-        sessionStorage.setItem('weather', weatherData.weather[0].main);
-        getBG(`${weatherData.weather[0].main} weather`).then((background) => {
-          body.style.backgroundImage = `linear-gradient(180deg, rgba(8, 15, 26, 0.59) 0%, rgba(17, 17, 46, 0.46) 100%),
-        url('${background}')`;
-        }).catch(() => {
-          console.log('Exceeded the number of background image requests (50 / hour)');
-          body.style.backgroundColor = 'black';
-        });
-
-
-        // _________________________map_________________________;
-
-
-        const geoInfoLatitude = document.querySelector('.geo-info__latitude');
-        const geoInfoLongitude = document.querySelector('.geo-info__longitude');
-
-
-        const options = {
-          enableHighAccuracy: true,
-          timeout: 5000,
-          maximumAge: 0,
-        };
-
-        function success(pos) {
-          const crd = pos.coords;
-          if (sessionStorage.latitude === undefined) {
-            sessionStorage.latitude = Math.round(crd.latitude * 100) / 100;
-            sessionStorage.longitude = Math.round(crd.longitude * 100) / 100;
-          }
-        }
-
-        function error(err) {
-          // eslint-disable-next-line no-console
-          console.warn(`ERROR(${err.code}): ${err.message}`);
-        }
-
-        navigator.geolocation.getCurrentPosition(success, error, options);
-
-        const tryGetMap = setInterval(() => {
-          if (sessionStorage.latitude !== undefined && sessionStorage.longitude !== undefined) {
-            /* eslint-disable no-unused-vars */
-            /* eslint-disable no-undef */
-
-            const latitude = { en: 'Latitude:', ru: 'Широта:', be: 'Шырата:' };
-            const longitude = { en: 'Longitude:', ru: 'Долгота:', be: 'даўгата:' };
-            geoInfoLatitude.innerHTML = `${latitude[sessionStorage.lang]} ${sessionStorage.latitude.slice(0, 2)}°${sessionStorage.latitude.slice(3, 5)}'`;
-            geoInfoLongitude.innerHTML = `${longitude[sessionStorage.lang]} ${sessionStorage.longitude.slice(0, 2)}°${sessionStorage.longitude.slice(3, 5)}'`;
-
-            mapboxgl.accessToken = 'pk.eyJ1IjoicmFtcDQiLCJhIjoiY2s0NGJvMGt1MDlpZzNqcDlkNjhkZGd4bSJ9._tcW4OCvJTpC003r3NwMqQ';
-            const map = new mapboxgl.Map({
-              container: 'map', // container id
-              style: 'mapbox://styles/mapbox/streets-v9',
-              center: [sessionStorage.longitude, sessionStorage.latitude],
-              zoom: 9, // starting zoom
-            });
-
-            const size = 500;
-
-            // implementation of CustomLayerInterface to draw a pulsing dot icon on the map
-            // see https://docs.mapbox.com/mapbox-gl-js/api/#customlayerinterface for more info
-            const pulsingDot = {
-              width: size,
-              height: size,
-              data: new Uint8Array(size * size * 4),
-
-              // get rendering context for the map canvas when layer is added to the map
-              onAdd() {
-                const canvas = document.createElement('canvas');
-                canvas.width = this.width;
-                canvas.height = this.height;
-                this.context = canvas.getContext('2d');
-              },
-
-              // called once before every frame where the icon will be used
-              render() {
-                const duration = 1000;
-                const t = (performance.now() % duration) / duration;
-
-                const radius = (size / 2) * 0.3;
-                const outerRadius = (size / 2) * 0.7 * t + radius;
-                const { context } = this;
-
-                // draw outer circle
-                context.clearRect(0, 0, this.width, this.height);
-                context.beginPath();
-                context.arc(
-                  this.width / 2,
-                  this.height / 2,
-                  outerRadius,
-                  0,
-                  Math.PI * 2,
-                );
-                context.fillStyle = `rgba(255, 200, 200,${1 - t})`;
-                context.fill();
-
-                // draw inner circle
-                context.beginPath();
-                context.arc(
-                  this.width / 2,
-                  this.height / 2,
-                  radius,
-                  0,
-                  Math.PI * 2,
-                );
-                context.fillStyle = 'red';
-                context.strokeStyle = 'white';
-                context.lineWidth = 2 + 4 * (1 - t);
-                context.fill();
-                context.stroke();
-
-                // update this image's data with data from the canvas
-                this.data = context.getImageData(
-                  0,
-                  0,
-                  this.width,
-                  this.height,
-                ).data;
-
-                // continuously repaint the map, resulting in the smooth animation of the dot
-                map.triggerRepaint();
-
-                // return `true` to let the map know that the image was updated
-                return true;
-              },
-            };
-
-            map.on('load', () => {
-              map.addImage('pulsing-dot', pulsingDot, { pixelRatio: 10 });
-
-              map.addLayer({
-                id: 'points',
-                type: 'symbol',
-                source: {
-                  type: 'geojson',
-                  data: {
-                    type: 'FeatureCollection',
-                    features: [
-                      {
-                        type: 'Feature',
-                        geometry: {
-                          type: 'Point',
-                          coordinates: [sessionStorage.longitude, sessionStorage.latitude],
-                        },
-                      },
-                    ],
-                  },
-                },
-                layout: {
-                  'icon-image': 'pulsing-dot',
-                },
-              });
-            });
-
-
-            /* eslint-enable no-unused-vars */
-            /* eslint-enable no-undef */
-
-            clearTimeout(tryGetMap);
-          }
-        }, 100);
-      });
-      clearTimeout(tryGetWeatherData);
+  getWeatherData(sessionStorage.city, sessionStorage.lang).then((result) => {
+    if (result.message) {
+      const alertsArray = {
+        en: 'City not found, enter the correct city name (try enter the international English name)',
+        ru: 'Город не найден, введите корректное название (попробуйте ввести английское международное название города)',
+        be: 'Горад не знойдзен, увядзіце каррэктную назву (паспрабуйце ўкласці ангельскае міжнароднае назву горада)',
+      };
+      alert(alertsArray[sessionStorage.lang]);
+      return;
     }
-  }, 100);
+    sessionStorage.setItem('timezone', result.city.timezone);
+    currentDateConstructor();
+
+
+    infoLocation.innerHTML = `${result.city.name}, ${getName(result.city.country)}`;
+
+    translate(infoLocation.innerHTML, sessionStorage.lang).then((data) => {
+      infoLocation.innerHTML = data;
+    });
+
+    sessionStorage.setItem('latitude', result.city.coord.lat);
+    sessionStorage.setItem('longitude', result.city.coord.lon);
+
+    const weatherDataArray = result.list;
+    const weatherData = weatherDataArray[0];
+    mainWeatherTemperature.innerHTML = `${Math.round(weatherData.main.temp)}`;
+    mainWeatherIcon.style.backgroundImage = `url('http://openweathermap.org/img/wn/${weatherData.weather[0].icon}@2x.png')`;
+
+    const beWeatherDescription = {
+      '01d': 'яснае неба',
+      '02d': 'некалькі аблокаў',
+      '03d': 'раскіданыя хмары',
+      '04d': 'разбітыя хмары',
+      '09d': 'ліўневы дождж',
+      '010d': 'дождж',
+      '011d': 'навальніца',
+      '013d': 'снег',
+      '50d': 'туман',
+      '01n': 'яснае неба',
+      '02n': 'некалькі аблокаў',
+      '03n': 'раскіданыя хмары',
+      '04n': 'разбітыя хмары',
+      '09n': 'ліўневы дождж',
+      '010n': 'дождж',
+      '011n': 'навальніца',
+      '013n': 'снег',
+      '50n': 'туман',
+    };
+
+    if (sessionStorage.lang === 'en' || sessionStorage.lang === 'ru') {
+      detailsItems[0].innerHTML = weatherData.weather[0].description;
+    }
+
+    if (sessionStorage.lang === 'be') {
+      const iconCode = weatherData.weather[0].icon;
+      detailsItems[0].innerHTML = `${beWeatherDescription[iconCode]}`;
+    }
+
+
+    const feelsLike = { en: 'feels like:', ru: 'чувствуется как:', be: 'адчуваецца як:' };
+    const wind = { en: 'wind: ', ru: 'ветер:', be: 'вецер:' };
+    const windMS = { en: 'm/s', ru: 'м/c', be: 'м/c' };
+    const humidity = { en: 'HUMIDITY: ', ru: 'влажность:', be: 'вільготнасць:' };
+
+    detailsItems[1].innerHTML = `${feelsLike[sessionStorage.lang]} ${Math.round(weatherData.main.feels_like)}°`;
+    detailsItems[2].innerHTML = `${wind[sessionStorage.lang]} ${Math.round(weatherData.wind.speed)} ${windMS[sessionStorage.lang]}`;
+    detailsItems[3].innerHTML = `${humidity[sessionStorage.lang]}  ${Math.round(weatherData.main.humidity)}%`;
+
+    // 3 days forecast
+    const curHours = `${weatherDataArray[0].dt_txt[11]}${weatherDataArray[0].dt_txt[12]}`;
+    let nextDayIndex = (24 - curHours + 12) / 3;
+
+    for (let i = 0; i < 3; i += 1) {
+      forecastItemDayArray[i].innerHTML = `${setDay(getCurrentDate().getDay() + i + 1)}`;
+      forecastItemTemperatureArray[i].innerHTML = `${Math.round(weatherDataArray[nextDayIndex].main.temp)}`;
+      forecastItemIconArray[i].style.backgroundImage = `url('http://openweathermap.org/img/wn/${weatherDataArray[nextDayIndex].weather[0].icon}@2x.png')`;
+      nextDayIndex += 8;
+    }
+
+    sessionStorage.setItem('weather', weatherData.weather[0].main);
+    getBG(`${weatherData.weather[0].main} weather`).then((background) => {
+      body.style.backgroundImage = `linear-gradient(180deg, rgba(8, 15, 26, 0.59) 0%, rgba(17, 17, 46, 0.46) 100%),
+        url('${background}')`;
+    }).catch(() => {
+      console.log('Exceeded the number of background image requests (50 / hour)');
+      body.style.backgroundColor = 'black';
+    });
+
+
+    // _________________________map_________________________;
+
+
+    /* eslint-disable no-unused-vars */
+    /* eslint-disable no-undef */
+
+    const latitude = { en: 'Latitude:', ru: 'Широта:', be: 'Шырата:' };
+    const longitude = { en: 'Longitude:', ru: 'Долгота:', be: 'даўгата:' };
+    geoInfoLatitude.innerHTML = `${latitude[sessionStorage.lang]} ${sessionStorage.latitude.slice(0, 2)}°${sessionStorage.latitude.slice(3, 5)}'`;
+    geoInfoLongitude.innerHTML = `${longitude[sessionStorage.lang]} ${sessionStorage.longitude.slice(0, 2)}°${sessionStorage.longitude.slice(3, 5)}'`;
+
+    mapboxgl.accessToken = 'pk.eyJ1IjoicmFtcDQiLCJhIjoiY2s0NGJvMGt1MDlpZzNqcDlkNjhkZGd4bSJ9._tcW4OCvJTpC003r3NwMqQ';
+    const map = new mapboxgl.Map({
+      container: 'map', // container id
+      style: 'mapbox://styles/mapbox/streets-v9',
+      center: [sessionStorage.longitude, sessionStorage.latitude],
+      zoom: 9, // starting zoom
+    });
+
+    const size = 500;
+
+    // implementation of CustomLayerInterface to draw a pulsing dot icon on the map
+    // see https://docs.mapbox.com/mapbox-gl-js/api/#customlayerinterface for more info
+    const pulsingDot = {
+      width: size,
+      height: size,
+      data: new Uint8Array(size * size * 4),
+
+      // get rendering context for the map canvas when layer is added to the map
+      onAdd() {
+        const canvas = document.createElement('canvas');
+        canvas.width = this.width;
+        canvas.height = this.height;
+        this.context = canvas.getContext('2d');
+      },
+
+      // called once before every frame where the icon will be used
+      render() {
+        const duration = 1000;
+        const t = (performance.now() % duration) / duration;
+
+        const radius = (size / 2) * 0.3;
+        const outerRadius = (size / 2) * 0.7 * t + radius;
+        const { context } = this;
+
+        // draw outer circle
+        context.clearRect(0, 0, this.width, this.height);
+        context.beginPath();
+        context.arc(
+          this.width / 2,
+          this.height / 2,
+          outerRadius,
+          0,
+          Math.PI * 2,
+        );
+        context.fillStyle = `rgba(255, 200, 200,${1 - t})`;
+        context.fill();
+
+        // draw inner circle
+        context.beginPath();
+        context.arc(
+          this.width / 2,
+          this.height / 2,
+          radius,
+          0,
+          Math.PI * 2,
+        );
+        context.fillStyle = 'red';
+        context.strokeStyle = 'white';
+        context.lineWidth = 2 + 4 * (1 - t);
+        context.fill();
+        context.stroke();
+
+        // update this image's data with data from the canvas
+        this.data = context.getImageData(
+          0,
+          0,
+          this.width,
+          this.height,
+        ).data;
+
+        // continuously repaint the map, resulting in the smooth animation of the dot
+        map.triggerRepaint();
+
+        // return `true` to let the map know that the image was updated
+        return true;
+      },
+    };
+
+    map.on('load', () => {
+      map.addImage('pulsing-dot', pulsingDot, { pixelRatio: 10 });
+
+      map.addLayer({
+        id: '(po)ints',
+        type: 'symbol',
+        source: {
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: [
+              {
+                type: 'Feature',
+                geometry: {
+                  type: 'Point',
+                  coordinates: [sessionStorage.longitude, sessionStorage.latitude],
+                },
+              },
+            ],
+          },
+        },
+        layout: {
+          'icon-image': 'pulsing-dot',
+        },
+      });
+    });
+
+
+    /* eslint-enable no-unused-vars */
+    /* eslint-enable no-undef */
+  });
 }
 
 searchRowButton.addEventListener('click', () => {
@@ -540,11 +508,34 @@ const langSwitcherArrow = document.querySelector('.lang-switcher__arrow');
 
 
 // eslint-disable-next-line no-unused-vars
+function translatePage(translateTo) {
+  const itemsForTranslte = [infoLocation, detailsItems[0], detailsItems[1], detailsItems[2], detailsItems[3], geoInfoLatitude, geoInfoLongitude];
+
+  for (let i = 0; i < itemsForTranslte.length; i += 1) {
+    translate(itemsForTranslte[i].innerHTML, { from: sessionStorage.lang, to: translateTo }).then((translatedItem) => {
+      itemsForTranslte[i].innerHTML = translatedItem;
+    });
+  }
+  translate(searchRowField.value, { from: sessionStorage.lang, to: translateTo }).then((translatedItem) => {
+    searchRowField.value = translatedItem;
+  });
+}
+
 function chooseLang(event) {
   event.stopPropagation();
   const newLang = event.target.innerHTML.toLowerCase();
+  translatePage(newLang);
   sessionStorage.lang = newLang;
-  updateData();
+
+
+  currentDateConstructor();
+
+  const daysForTranslate = [forecastItemDayArray[0], forecastItemDayArray[1], forecastItemDayArray[2]];
+
+  for (let i = 0; i < 3; i += 1) {
+    console.log(+sessionStorage.curDay + i);
+    daysForTranslate[i].innerHTML = setDay(sessionStorage.curDay + i);
+  }
 
   const langSwitcherItemCurrent = document.querySelector('.lang-switcher__item_current');
   langSwitcherItemCurrent.classList.remove('lang-switcher__item_current');

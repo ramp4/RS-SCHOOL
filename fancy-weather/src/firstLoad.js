@@ -4,15 +4,6 @@
 
 import translate from 'translate';
 
-// ... include translate
-
-translate.engine = 'yandex';
-translate.key = 'trnsl.1.1.20191215T140755Z.ff0079c14082a29c.1bd8c2aa7294ef463c34f210d29ee889a108ecdd';
-
-
-// ... use translate()
-
-
 const infoLocation = document.querySelector('.info__location');
 const infoDate = document.querySelector('.info__date');
 const mainWeatherTemperature = document.querySelector('.main-weather__temperature');
@@ -22,6 +13,54 @@ const body = document.querySelector('body');
 const forecastItemDayArray = document.getElementsByClassName('forecast-item__day');
 const forecastItemTemperatureArray = document.getElementsByClassName('forecast-item__temperature');
 const forecastItemIconArray = document.getElementsByClassName('forecast-item__icon');
+
+
+const options = {
+  enableHighAccuracy: true,
+  timeout: 5000,
+  maximumAge: 0,
+};
+
+async function success(pos) {
+  const crd = pos.coords;
+  sessionStorage.latitude = Math.round(crd.latitude * 100) / 100;
+  sessionStorage.longitude = Math.round(crd.longitude * 100) / 100;
+  // eslint-disable-next-line no-use-before-define
+  drawMap();
+
+  async function getInfoLocationData(lat, lng) {
+    const url = `https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lng}&key=ac02709a988248a1a2d8eb20e203fa89`;
+    let result = await fetch(url).then((data) => data.json());
+    result = result.results[0].components;
+    return result;
+  }
+  const locationData = await getInfoLocationData(sessionStorage.latitude, sessionStorage.longitude);
+
+  infoLocation.innerHTML = `${locationData.city}, ${locationData.country}`;
+
+  translate(infoLocation.innerHTML, sessionStorage.lang).then((data) => {
+    infoLocation.innerHTML = data;
+  });
+  sessionStorage.setItem('city', locationData.city);
+  sessionStorage.setItem('tType', 'Celsius');
+}
+
+function error(err) {
+  // eslint-disable-next-line no-use-before-define
+  getLocationDataAsyncFunction();
+  console.warn(`ERROR(${err.code}): ${err.message}`);
+  // eslint-disable-next-line no-use-before-define
+  drawMap();
+}
+
+// ... include translate
+
+translate.engine = 'yandex';
+translate.key = 'trnsl.1.1.20191215T140755Z.ff0079c14082a29c.1bd8c2aa7294ef463c34f210d29ee889a108ecdd';
+
+
+// ... use translate()
+
 
 // _________________________api_________________________
 
@@ -87,22 +126,151 @@ async function getWeatherData(city, lang) {
 }
 
 
-// _________________________location_________________________
+// _________________________map_________________________;
 
-getLocationData().then((locationData) => {
-  infoLocation.innerHTML = `${locationData.city}, ${getName(locationData.country)}`;
 
-  translate(infoLocation.innerHTML, sessionStorage.lang).then((data) => {
-    infoLocation.innerHTML = data;
+const geoInfoLatitude = document.querySelector('.geo-info__latitude');
+const geoInfoLongitude = document.querySelector('.geo-info__longitude');
+
+
+function drawMap() {
+  /* eslint-disable no-unused-vars */
+  /* eslint-disable no-undef */
+
+  const latitude = { en: 'Latitude:', ru: 'Широта:', be: 'Шырата:' };
+  const longitude = { en: 'Longitude:', ru: 'Долгота:', be: 'даўгата:' };
+  geoInfoLatitude.innerHTML = `${latitude[sessionStorage.lang]} ${sessionStorage.latitude.slice(0, 2)}°${sessionStorage.latitude.slice(3, 5)}'`;
+  geoInfoLongitude.innerHTML = `${longitude[sessionStorage.lang]} ${sessionStorage.longitude.slice(0, 2)}°${sessionStorage.longitude.slice(3, 5)}'`;
+
+
+  mapboxgl.accessToken = 'pk.eyJ1IjoicmFtcDQiLCJhIjoiY2s0NGJvMGt1MDlpZzNqcDlkNjhkZGd4bSJ9._tcW4OCvJTpC003r3NwMqQ';
+  const map = new mapboxgl.Map({
+    container: 'map', // container id
+    style: 'mapbox://styles/mapbox/streets-v9',
+    center: [sessionStorage.longitude, sessionStorage.latitude], // starting position [lng, lat]
+    zoom: 9, // starting zoom
   });
-  sessionStorage.setItem('city', locationData.city);
-  sessionStorage.setItem('tType', 'Celsius');
-  const latitude = locationData.loc.slice(0, 7);
-  sessionStorage.setItem('latitude', Math.round(latitude * 100) / 100);
-  const longitude = locationData.loc.slice(8, 15);
-  sessionStorage.setItem('longitude', Math.round(longitude * 100) / 100);
-});
 
+  const size = 500;
+
+  // implementation of CustomLayerInterface to draw a pulsing dot icon on the map
+  // see https://docs.mapbox.com/mapbox-gl-js/api/#customlayerinterface for more info
+  const pulsingDot = {
+    width: size,
+    height: size,
+    data: new Uint8Array(size * size * 4),
+
+    // get rendering context for the map canvas when layer is added to the map
+    onAdd() {
+      const canvas = document.createElement('canvas');
+      canvas.width = this.width;
+      canvas.height = this.height;
+      this.context = canvas.getContext('2d');
+    },
+
+    // called once before every frame where the icon will be used
+    render() {
+      const duration = 1000;
+      const t = (performance.now() % duration) / duration;
+
+      const radius = (size / 2) * 0.3;
+      const outerRadius = (size / 2) * 0.7 * t + radius;
+      const { context } = this;
+
+      // draw outer circle
+      context.clearRect(0, 0, this.width, this.height);
+      context.beginPath();
+      context.arc(
+        this.width / 2,
+        this.height / 2,
+        outerRadius,
+        0,
+        Math.PI * 2,
+      );
+      context.fillStyle = `rgba(255, 200, 200,${1 - t})`;
+      context.fill();
+
+      // draw inner circle
+      context.beginPath();
+      context.arc(
+        this.width / 2,
+        this.height / 2,
+        radius,
+        0,
+        Math.PI * 2,
+      );
+      context.fillStyle = 'red';
+      context.strokeStyle = 'white';
+      context.lineWidth = 2 + 4 * (1 - t);
+      context.fill();
+      context.stroke();
+
+      // update this image's data with data from the canvas
+      this.data = context.getImageData(
+        0,
+        0,
+        this.width,
+        this.height,
+      ).data;
+
+      // continuously repaint the map, resulting in the smooth animation of the dot
+      map.triggerRepaint();
+
+      // return `true` to let the map know that the image was updated
+      return true;
+    },
+  };
+
+  map.on('load', () => {
+    map.addImage('pulsing-dot', pulsingDot, { pixelRatio: 10 });
+
+    map.addLayer({
+      id: 'points',
+      type: 'symbol',
+      source: {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: [
+            {
+              type: 'Feature',
+              geometry: {
+                type: 'Point',
+                coordinates: [sessionStorage.longitude, sessionStorage.latitude],
+              },
+            },
+          ],
+        },
+      },
+      layout: {
+        'icon-image': 'pulsing-dot',
+      },
+    });
+  });
+
+
+  /* eslint-enable no-unused-vars */
+  /* eslint-enable no-undef */
+}
+
+
+// _________________________location_________________________
+async function getLocationDataAsyncFunction() {
+  await getLocationData().then((locationData) => {
+    infoLocation.innerHTML = `${locationData.city}, ${getName(locationData.country)}`;
+
+    translate(infoLocation.innerHTML, sessionStorage.lang).then((data) => {
+      infoLocation.innerHTML = data;
+    });
+    sessionStorage.setItem('city', locationData.city);
+    sessionStorage.setItem('tType', 'Celsius');
+    const latitude = locationData.loc.slice(0, 7);
+    sessionStorage.setItem('latitude', Math.round(latitude * 100) / 100);
+    const longitude = locationData.loc.slice(8, 15);
+    sessionStorage.setItem('longitude', Math.round(longitude * 100) / 100);
+  });
+}
+navigator.geolocation.getCurrentPosition(success, error, options);
 
 // _________________________date_________________________
 
@@ -189,13 +357,14 @@ function dateToTxt(date) {
     if (number < 10) return `0${number}`;
     return number;
   }
-  const result = `${setDay(date.getDay())} ${setZero(date.getDate())} ${setMonth(date.getMonth())} ${setZero(date.getHours())}: ${setZero(date.getMinutes())} `;
+  const result = `${setDay(date.getDay())} ${setZero(date.getDate())} ${setMonth(date.getMonth())} ${setZero(date.getHours())}:${setZero(date.getMinutes())} `;
 
   return result;
 }
 
 function getCurrentDate() {
   const currentDate = new Date(Date.now((Date.UTC) - sessionStorage.timezone * 1000));
+  sessionStorage.curDay = currentDate.getDay();
   return currentDate;
 }
 
@@ -235,8 +404,8 @@ function getBG(weather) {
 
 // _________________________weather/date_________________________;
 
-
-const tryGetWeatherData = setInterval(() => {
+async function updateWeatherData() {
+  await getLocationDataAsyncFunction();
   if (sessionStorage.city !== undefined && sessionStorage.lang !== undefined) {
     getWeatherData(sessionStorage.city, sessionStorage.lang).then((result) => {
       sessionStorage.setItem('timezone', result.city.timezone);
@@ -307,159 +476,6 @@ const tryGetWeatherData = setInterval(() => {
         body.style.backgroundColor = 'black';
       });
     });
-    clearTimeout(tryGetWeatherData);
-  }
-}, 100);
-
-
-// _________________________map_________________________;
-
-
-const geoInfoLatitude = document.querySelector('.geo-info__latitude');
-const geoInfoLongitude = document.querySelector('.geo-info__longitude');
-
-
-const options = {
-  enableHighAccuracy: true,
-  timeout: 5000,
-  maximumAge: 0,
-};
-
-function success(pos) {
-  const crd = pos.coords;
-  if (sessionStorage.latitude === undefined) {
-    sessionStorage.latitude = Math.round(crd.latitude * 100) / 100;
-    sessionStorage.longitude = Math.round(crd.longitude * 100) / 100;
   }
 }
-
-function error(err) {
-  // eslint-disable-next-line no-console
-  console.warn(`ERROR(${err.code}): ${err.message}`);
-}
-
-navigator.geolocation.getCurrentPosition(success, error, options);
-
-const tryGetMap = setInterval(() => {
-  if (sessionStorage.latitude !== undefined && sessionStorage.longitude !== undefined) {
-    /* eslint-disable no-unused-vars */
-    /* eslint-disable no-undef */
-
-    const latitude = { en: 'Latitude:', ru: 'Широта:', be: 'Шырата:' };
-    const longitude = { en: 'Longitude:', ru: 'Долгота:', be: 'даўгата:' };
-    geoInfoLatitude.innerHTML = `${latitude[sessionStorage.lang]} ${sessionStorage.latitude.slice(0, 2)}°${sessionStorage.latitude.slice(3, 5)}'`;
-    geoInfoLongitude.innerHTML = `${longitude[sessionStorage.lang]} ${sessionStorage.longitude.slice(0, 2)}°${sessionStorage.longitude.slice(3, 5)}'`;
-
-
-    mapboxgl.accessToken = 'pk.eyJ1IjoicmFtcDQiLCJhIjoiY2s0NGJvMGt1MDlpZzNqcDlkNjhkZGd4bSJ9._tcW4OCvJTpC003r3NwMqQ';
-    const map = new mapboxgl.Map({
-      container: 'map', // container id
-      style: 'mapbox://styles/mapbox/streets-v9',
-      center: [sessionStorage.longitude, sessionStorage.latitude], // starting position [lng, lat]
-      zoom: 9, // starting zoom
-    });
-
-    const size = 500;
-
-    // implementation of CustomLayerInterface to draw a pulsing dot icon on the map
-    // see https://docs.mapbox.com/mapbox-gl-js/api/#customlayerinterface for more info
-    const pulsingDot = {
-      width: size,
-      height: size,
-      data: new Uint8Array(size * size * 4),
-
-      // get rendering context for the map canvas when layer is added to the map
-      onAdd() {
-        const canvas = document.createElement('canvas');
-        canvas.width = this.width;
-        canvas.height = this.height;
-        this.context = canvas.getContext('2d');
-      },
-
-      // called once before every frame where the icon will be used
-      render() {
-        const duration = 1000;
-        const t = (performance.now() % duration) / duration;
-
-        const radius = (size / 2) * 0.3;
-        const outerRadius = (size / 2) * 0.7 * t + radius;
-        const { context } = this;
-
-        // draw outer circle
-        context.clearRect(0, 0, this.width, this.height);
-        context.beginPath();
-        context.arc(
-          this.width / 2,
-          this.height / 2,
-          outerRadius,
-          0,
-          Math.PI * 2,
-        );
-        context.fillStyle = `rgba(255, 200, 200,${1 - t})`;
-        context.fill();
-
-        // draw inner circle
-        context.beginPath();
-        context.arc(
-          this.width / 2,
-          this.height / 2,
-          radius,
-          0,
-          Math.PI * 2,
-        );
-        context.fillStyle = 'red';
-        context.strokeStyle = 'white';
-        context.lineWidth = 2 + 4 * (1 - t);
-        context.fill();
-        context.stroke();
-
-        // update this image's data with data from the canvas
-        this.data = context.getImageData(
-          0,
-          0,
-          this.width,
-          this.height,
-        ).data;
-
-        // continuously repaint the map, resulting in the smooth animation of the dot
-        map.triggerRepaint();
-
-        // return `true` to let the map know that the image was updated
-        return true;
-      },
-    };
-
-    map.on('load', () => {
-      map.addImage('pulsing-dot', pulsingDot, { pixelRatio: 10 });
-
-      map.addLayer({
-        id: 'points',
-        type: 'symbol',
-        source: {
-          type: 'geojson',
-          data: {
-            type: 'FeatureCollection',
-            features: [
-              {
-                type: 'Feature',
-                geometry: {
-                  type: 'Point',
-                  coordinates: [sessionStorage.longitude, sessionStorage.latitude],
-                },
-              },
-            ],
-          },
-        },
-        layout: {
-          'icon-image': 'pulsing-dot',
-        },
-      });
-    });
-
-
-    /* eslint-enable no-unused-vars */
-    /* eslint-enable no-undef */
-
-    clearTimeout(tryGetMap);
-  }
-}, 100);
+updateWeatherData();
