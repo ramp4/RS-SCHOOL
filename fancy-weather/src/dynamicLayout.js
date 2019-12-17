@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 /* eslint-disable max-len */
 import translate from 'translate';
 
@@ -23,11 +24,36 @@ const searchRowField = document.querySelector('.search-row__field');
 const geoInfoLatitude = document.querySelector('.geo-info__latitude');
 const geoInfoLongitude = document.querySelector('.geo-info__longitude');
 
+// _________________________background image_________________________
+function idForRequestPlusPlus() {
+  if (+sessionStorage.idForRequest === 4) { sessionStorage.idForRequest = 0; } else {
+    sessionStorage.idForRequest = +sessionStorage.idForRequest + 1;
+  }
+}
+sessionStorage.BGerrors = 0;
+sessionStorage.idForRequest = 0;
 function getBG(weather) {
-  const url = `https://api.unsplash.com/photos/random?orientation=landscape&per_page=1&query=${weather}order_by=popular&client_id=09ade6d49c5651607a93d8183e34f5f6ba29411e9e3ef2388640614d25a3a986`;
+  const idArray = ['09ade6d49c5651607a93d8183e34f5f6ba29411e9e3ef2388640614d25a3a986',
+    'e640dda3eb995eea48ca8d0e694bd96feddde9640664a03f21223c1cf959f3cc',
+    '4ce17948ff77e352f8355a4d83c11aabde4aad9bf13718b32c8c2a567da5e238',
+    'c1ad25239dce8fa36c705cffe6d9cbde9d1077fe84c7ba987af5c2fe9ae1315f',
+    '5a33b689d25b5f14f108586677c9a23dd0b087079be6e95b4004504ad547c125'];
+
+  const url = `https://api.unsplash.com/photos/random?orientation=landscape&per_page=1&query=${weather}order_by=popular&quantity=30&client_id=${idArray[sessionStorage.idForRequest]}`;
   return fetch(url)
     .then((result) => result.json())
-    .then((data) => data.urls.regular);
+    .then((data) => data.urls.regular)
+    // eslint-disable-next-line consistent-return
+    .catch(() => {
+      if (+sessionStorage.BGerrors <= 4) {
+        console.log('Exceeded the number of background image requests(trying another access key)');
+        sessionStorage.BGerrors = +sessionStorage.BGerrors + 1;
+        idForRequestPlusPlus();
+        return getBG(weather);
+      }
+      console.log('Exceeded the number of background image requests');
+      body.style.backgroundColor = 'black';
+    });
 }
 
 
@@ -50,13 +76,16 @@ async function getWeatherData(city, lang) {
 
 const refreshBG = document.querySelector('.button-row__refresh-button');
 
-refreshBG.addEventListener('click', () => {
-  getBG(`${sessionStorage.weather} weather`).then((background) => {
+refreshBG.addEventListener('click', async () => {
+  let timeOfDay = 'day';
+  // eslint-disable-next-line no-use-before-define
+  if ((getCurrentDate().getHours()) > 20 || (getCurrentDate().getHours() < 8)) {
+    timeOfDay = 'night';
+  }
+
+  await getBG(`${sessionStorage.weather} ${timeOfDay}`).then((background) => {
     body.style.backgroundImage = `linear-gradient(180deg, rgba(8, 15, 26, 0.59) 0%, rgba(17, 17, 46, 0.46) 100%),
         url('${background}')`;
-  }).catch(() => {
-    console.log('Exceeded the number of background image requests (50 / hour)');
-    body.style.backgroundColor = 'black';
   });
 });
 
@@ -337,12 +366,15 @@ async function updateData() {
     }
 
     sessionStorage.setItem('weather', weatherData.weather[0].main);
-    getBG(`${weatherData.weather[0].main} weather`).then((background) => {
+    let timeOfDay = 'day';
+    if ((getCurrentDate().getHours()) > 20 || (getCurrentDate().getHours() < 8)) {
+      timeOfDay = 'night';
+    }
+
+
+    getBG(`${sessionStorage.weather} ${timeOfDay}`).then((background) => {
       body.style.backgroundImage = `linear-gradient(180deg, rgba(8, 15, 26, 0.59) 0%, rgba(17, 17, 46, 0.46) 100%),
         url('${background}')`;
-    }).catch(() => {
-      console.log('Exceeded the number of background image requests (50 / hour)');
-      body.style.backgroundColor = 'black';
     });
 
 
@@ -515,9 +547,8 @@ function translatePage(translateTo) {
       itemsForTranslte[i].innerHTML = translatedItem;
     });
   }
-  translate(searchRowField.value, { from: sessionStorage.lang, to: translateTo }).then((translatedItem) => {
-    searchRowField.value = translatedItem;
-  });
+  const searchRowFieldLangs = { en: 'Search city or ZIP', ru: 'Поиск города или ZIP', be: 'Пошук горада ці ZIP' };
+  searchRowField.value = searchRowFieldLangs[sessionStorage.lang];
 }
 
 function chooseLang(event) {

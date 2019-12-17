@@ -2,6 +2,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-param-reassign */
 
+
 import translate from 'translate';
 
 const infoLocation = document.querySelector('.info__location');
@@ -111,6 +112,7 @@ function setAppLang() {
 }
 
 setAppLang();
+
 
 async function getWeatherData(city, lang) {
   let cityEn = city;
@@ -393,12 +395,35 @@ function currentDateConstructor() {
 }
 
 // _________________________background image_________________________
-
+function idForRequestPlusPlus() {
+  if (+sessionStorage.idForRequest === 4) { sessionStorage.idForRequest = 0; } else {
+    sessionStorage.idForRequest = +sessionStorage.idForRequest + 1;
+  }
+}
+sessionStorage.BGerrors = 0;
+sessionStorage.idForRequest = 0;
 function getBG(weather) {
-  const url = `https://api.unsplash.com/photos/random?orientation=landscape&per_page=1&query=${weather}order_by=popular&client_id=09ade6d49c5651607a93d8183e34f5f6ba29411e9e3ef2388640614d25a3a986`;
+  const idArray = ['09ade6d49c5651607a93d8183e34f5f6ba29411e9e3ef2388640614d25a3a986',
+    'e640dda3eb995eea48ca8d0e694bd96feddde9640664a03f21223c1cf959f3cc',
+    '4ce17948ff77e352f8355a4d83c11aabde4aad9bf13718b32c8c2a567da5e238',
+    'c1ad25239dce8fa36c705cffe6d9cbde9d1077fe84c7ba987af5c2fe9ae1315f',
+    '5a33b689d25b5f14f108586677c9a23dd0b087079be6e95b4004504ad547c125'];
+
+  const url = `https://api.unsplash.com/photos/random?orientation=landscape&per_page=1&query=${weather}order_by=popular&quantity=30&client_id=${idArray[sessionStorage.idForRequest]}`;
   return fetch(url)
     .then((result) => result.json())
-    .then((data) => data.urls.regular);
+    .then((data) => data.urls.regular)
+    // eslint-disable-next-line consistent-return
+    .catch(() => {
+      if (+sessionStorage.BGerrors <= 4) {
+        console.log('Exceeded the number of background image requests(trying another access key)');
+        sessionStorage.BGerrors = +sessionStorage.BGerrors + 1;
+        idForRequestPlusPlus();
+        return getBG(weather);
+      }
+      console.log('Exceeded the number of background image requests');
+      body.style.backgroundColor = 'black';
+    });
 }
 
 
@@ -408,6 +433,7 @@ async function updateWeatherData() {
   await getLocationDataAsyncFunction();
   if (sessionStorage.city !== undefined && sessionStorage.lang !== undefined) {
     getWeatherData(sessionStorage.city, sessionStorage.lang).then((result) => {
+      console.log(result);
       sessionStorage.setItem('timezone', result.city.timezone);
       currentDateConstructor();
 
@@ -468,12 +494,15 @@ async function updateWeatherData() {
       }
 
       sessionStorage.setItem('weather', weatherData.weather[0].main);
-      getBG(`${weatherData.weather[0].main} weather`).then((background) => {
+
+      let timeOfDay = 'day';
+      if ((getCurrentDate().getHours()) > 20 || (getCurrentDate().getHours() < 8)) {
+        timeOfDay = 'night';
+      }
+
+      getBG(`${sessionStorage.weather} ${timeOfDay}`).then((background) => {
         body.style.backgroundImage = `linear-gradient(180deg, rgba(8, 15, 26, 0.59) 0%, rgba(17, 17, 46, 0.46) 100%),
         url('${background}')`;
-      }).catch(() => {
-        console.log('Exceeded the number of background image requests (50 / hour)');
-        body.style.backgroundColor = 'black';
       });
     });
   }
