@@ -5,6 +5,9 @@
 
 import translate from 'translate';
 
+const refreshButtonInsider = document.querySelector('.refreshButtonInsider');
+
+refreshButtonInsider.classList.toggle('paused');
 const infoLocation = document.querySelector('.info__location');
 const infoDate = document.querySelector('.info__date');
 const mainWeatherTemperature = document.querySelector('.main-weather__temperature');
@@ -15,6 +18,46 @@ const forecastItemDayArray = document.getElementsByClassName('forecast-item__day
 const forecastItemTemperatureArray = document.getElementsByClassName('forecast-item__temperature');
 const forecastItemIconArray = document.getElementsByClassName('forecast-item__icon');
 
+const langSwitcherItemArray = document.getElementsByClassName('lang-switcher__item');
+const langSwitcherItemCurrent = document.querySelector('.lang-switcher__item_current');
+const langSwitcherEN = langSwitcherItemArray[0];
+const langSwitcherRU = langSwitcherItemArray[1];
+const langSwitcherBE = langSwitcherItemArray[2];
+
+const searchRowField = document.querySelector('.search-row__field');
+const searchRowButton = document.querySelector('.search-row__button');
+
+function getUserLang() {
+  const language = window.navigator ? (window.navigator.language
+    || window.navigator.systemLanguage
+    || window.navigator.userLanguage) : 'ru';
+  const result = language.substr(0, 2).toLowerCase();
+  return result;
+}
+
+function setAppLang() {
+  const receivedLang = getUserLang();
+  if (receivedLang === 'ru') {
+    langSwitcherItemCurrent.classList.toggle('lang-switcher__item_current');
+    langSwitcherRU.classList.toggle('lang-switcher__item_current');
+    sessionStorage.lang = receivedLang;
+    searchRowField.value = 'Поиск города или ZIP';
+    searchRowButton.innerHTML = 'Найти';
+    return;
+  }
+  if (receivedLang === 'be') {
+    langSwitcherBE.style.order = '0';
+    sessionStorage.lang = receivedLang;
+    langSwitcherItemCurrent.classList.toggle('lang-switcher__item_current');
+    langSwitcherBE.classList.toggle('lang-switcher__item_current');
+    searchRowButton.innerHTML = 'Знайсці';
+    return;
+  }
+  langSwitcherEN.style.order = '0';
+  sessionStorage.lang = 'en';
+}
+
+setAppLang();
 
 const options = {
   enableHighAccuracy: true,
@@ -72,46 +115,6 @@ function getLocationData() {
 
 
 const { getName } = require('country-list');
-
-function getUserLang() {
-  const language = window.navigator ? (window.navigator.language
-    || window.navigator.systemLanguage
-    || window.navigator.userLanguage) : 'ru';
-  const result = language.substr(0, 2).toLowerCase();
-  return result;
-}
-
-const langSwitcherItemArray = document.getElementsByClassName('lang-switcher__item');
-const langSwitcherItemCurrent = document.querySelector('.lang-switcher__item_current');
-const langSwitcherEN = langSwitcherItemArray[0];
-const langSwitcherRU = langSwitcherItemArray[1];
-const langSwitcherBE = langSwitcherItemArray[2];
-
-const searchRowField = document.querySelector('.search-row__field');
-const searchRowButton = document.querySelector('.search-row__button');
-function setAppLang() {
-  const receivedLang = getUserLang();
-  if (receivedLang === 'ru') {
-    langSwitcherItemCurrent.classList.toggle('lang-switcher__item_current');
-    langSwitcherRU.classList.toggle('lang-switcher__item_current');
-    sessionStorage.lang = receivedLang;
-    searchRowField.value = 'Поиск города или ZIP';
-    searchRowButton.innerHTML = 'Найти';
-    return;
-  }
-  if (receivedLang === 'be') {
-    langSwitcherBE.style.order = '0';
-    sessionStorage.lang = receivedLang;
-    langSwitcherItemCurrent.classList.toggle('lang-switcher__item_current');
-    langSwitcherBE.classList.toggle('lang-switcher__item_current');
-    searchRowButton.innerHTML = 'Знайсці';
-    return;
-  }
-  langSwitcherEN.style.order = '0';
-  sessionStorage.lang = 'en';
-}
-
-setAppLang();
 
 
 async function getWeatherData(city, lang) {
@@ -280,7 +283,7 @@ navigator.geolocation.getCurrentPosition(success, error, options);
 function setDay(index) {
   let i = index;
   if (i > 6) {
-    i -= 7;
+    i = 0;
   }
   let days;
   if (sessionStorage.lang.toLowerCase() === 'en') {
@@ -403,6 +406,7 @@ function idForRequestPlusPlus() {
 sessionStorage.BGerrors = 0;
 sessionStorage.idForRequest = 0;
 function getBG(weather) {
+  refreshButtonInsider.classList.toggle('paused');
   const idArray = ['09ade6d49c5651607a93d8183e34f5f6ba29411e9e3ef2388640614d25a3a986',
     'e640dda3eb995eea48ca8d0e694bd96feddde9640664a03f21223c1cf959f3cc',
     '4ce17948ff77e352f8355a4d83c11aabde4aad9bf13718b32c8c2a567da5e238',
@@ -412,9 +416,13 @@ function getBG(weather) {
   const url = `https://api.unsplash.com/photos/random?orientation=landscape&per_page=1&query=${weather}order_by=popular&quantity=30&client_id=${idArray[sessionStorage.idForRequest]}`;
   return fetch(url)
     .then((result) => result.json())
-    .then((data) => data.urls.regular)
+    .then((data) => {
+      refreshButtonInsider.classList.toggle('paused');
+      return data.urls.regular;
+    })
     // eslint-disable-next-line consistent-return
     .catch(() => {
+      refreshButtonInsider.classList.toggle('paused');
       if (+sessionStorage.BGerrors <= 4) {
         console.log('Exceeded the number of background image requests(trying another access key)');
         sessionStorage.BGerrors = +sessionStorage.BGerrors + 1;
@@ -423,6 +431,7 @@ function getBG(weather) {
       }
       console.log('Exceeded the number of background image requests');
       body.style.backgroundColor = 'black';
+      refreshButtonInsider.classList.toggle('paused');
     });
 }
 
@@ -503,6 +512,7 @@ async function updateWeatherData() {
       getBG(`${sessionStorage.weather} ${timeOfDay}`).then((background) => {
         body.style.backgroundImage = `linear-gradient(180deg, rgba(8, 15, 26, 0.59) 0%, rgba(17, 17, 46, 0.46) 100%),
         url('${background}')`;
+        refreshButtonInsider.classList.toggle('paused');
       });
     });
   }

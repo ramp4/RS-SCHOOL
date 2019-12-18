@@ -59,6 +59,39 @@ body {
   background-repeat: no-repeat;
   border-radius: 0.35rem;
   cursor: pointer;
+  display: flex;
+  justify-content: row;
+  flex-direction: flex-end;
+  align-items: center;
+  position: relative;
+}
+
+@keyframes rotateImage {
+  from {
+    transform: rotate(0);
+
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.refreshButtonInsider {
+  height: 50%;
+  width: 50%;
+  background-image: url(./dist/assets/refreshButtonInsider.svg);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  left: 25%;
+  position: absolute;
+  animation: rotateImage infinite 0.5s ease-in-out;
+  animation-play-state: paused;
+}
+
+.paused {
+  animation-play-state: running;
 }
 
 .button-row__refresh-button:hover {

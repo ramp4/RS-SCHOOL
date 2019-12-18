@@ -10,7 +10,7 @@ translate.key = 'trnsl.1.1.20191215T140755Z.ff0079c14082a29c.1bd8c2aa7294ef463c3
 
 // ... use translate()
 
-
+const refreshButtonInsider = document.querySelector('.refreshButtonInsider');
 const body = document.querySelector('body');
 const infoLocation = document.querySelector('.info__location');
 const infoDate = document.querySelector('.info__date');
@@ -53,6 +53,7 @@ function getBG(weather) {
       }
       console.log('Exceeded the number of background image requests');
       body.style.backgroundColor = 'black';
+      refreshButtonInsider.classList.toggle('paused');
     });
 }
 
@@ -77,6 +78,7 @@ async function getWeatherData(city, lang) {
 const refreshBG = document.querySelector('.button-row__refresh-button');
 
 refreshBG.addEventListener('click', async () => {
+  refreshButtonInsider.classList.toggle('paused');
   let timeOfDay = 'day';
   // eslint-disable-next-line no-use-before-define
   if ((getCurrentDate().getHours()) > 20 || (getCurrentDate().getHours() < 8)) {
@@ -87,6 +89,7 @@ refreshBG.addEventListener('click', async () => {
     body.style.backgroundImage = `linear-gradient(180deg, rgba(8, 15, 26, 0.59) 0%, rgba(17, 17, 46, 0.46) 100%),
         url('${background}')`;
   });
+  refreshButtonInsider.classList.toggle('paused');
 });
 
 
@@ -152,7 +155,7 @@ const searchRowButton = document.querySelector('.search-row__button');
 function setDay(index) {
   let i = index;
   if (i > 6) {
-    i -= 7;
+    i = 0;
   }
   let days;
   if (sessionStorage.lang.toLowerCase() === 'en') {
@@ -556,6 +559,11 @@ function chooseLang(event) {
   const newLang = event.target.innerHTML.toLowerCase();
   translatePage(newLang);
   sessionStorage.lang = newLang;
+
+  for (let i = 0; i < 3; i += 1) {
+    console.log(sessionStorage.lang);
+    forecastItemDayArray[i].innerHTML = setDay(+sessionStorage.curDay + i + 1);
+  }
 
 
   currentDateConstructor();

@@ -12,6 +12,10 @@ const refreshButton = document.createElement('div');
 refreshButton.className = 'button-row__refresh-button';
 buttonRow.append(refreshButton);
 
+const refreshButtonInsider = document.createElement('div');
+refreshButtonInsider.className = 'refreshButtonInsider';
+refreshButton.append(refreshButtonInsider);
+
 const langSwitcher = document.createElement('ul');
 langSwitcher.className = 'lang-switcher';
 buttonRow.append(langSwitcher);
