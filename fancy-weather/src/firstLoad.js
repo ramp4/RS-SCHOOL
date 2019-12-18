@@ -368,9 +368,10 @@ function dateToTxt(date) {
 }
 
 function getCurrentDate() {
-  const currentDate = new Date(Date.now((Date.UTC) - sessionStorage.timezone * 1000));
-  sessionStorage.curDay = currentDate.getDay();
-  return currentDate;
+  const d = new Date();
+  d.setTime(d.getTime() + d.getTimezoneOffset() * 60 * 1000 + sessionStorage.timezone * 1000);
+  sessionStorage.curDay = d.getDay();
+  return d;
 }
 
 
@@ -441,10 +442,9 @@ function getBG(weather) {
 async function updateWeatherData() {
   await getLocationDataAsyncFunction();
   if (sessionStorage.city !== undefined && sessionStorage.lang !== undefined) {
-    getWeatherData(sessionStorage.city, sessionStorage.lang).then((result) => {
-      console.log(result);
+    await getWeatherData(sessionStorage.city, sessionStorage.lang).then((result) => {
       sessionStorage.setItem('timezone', result.city.timezone);
-      currentDateConstructor();
+
 
       const weatherDataArray = result.list;
       const weatherData = weatherDataArray[0];
@@ -516,5 +516,6 @@ async function updateWeatherData() {
       });
     });
   }
+  currentDateConstructor();
 }
 updateWeatherData();

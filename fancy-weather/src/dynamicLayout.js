@@ -169,14 +169,14 @@ function setDay(index) {
   if (sessionStorage.lang.toLowerCase() === 'be') {
     days = ['Нядзеля', 'Панядзелак', 'аўторак', 'серада', 'чацвер', 'Пятніца', 'Субота'];
   }
-  console.log(days[i]);
   return days[i];
 }
 
 function getCurrentDate() {
-  const currentDate = new Date(Date.now((Date.UTC) - sessionStorage.timezone * 1000));
-  sessionStorage.curDay = currentDate.getDay();
-  return currentDate;
+  const d = new Date();
+  d.setTime(d.getTime() + d.getTimezoneOffset() * 60 * 1000 + sessionStorage.timezone * 1000);
+  sessionStorage.curDay = d.getDay();
+  return d;
 }
 
 
@@ -289,7 +289,7 @@ async function updateData() {
     searchRowButton.innerHTML = 'search';
   }
 
-  getWeatherData(sessionStorage.city, sessionStorage.lang).then((result) => {
+  await getWeatherData(sessionStorage.city, sessionStorage.lang).then((result) => {
     if (result.message) {
       const alertsArray = {
         en: 'City not found, enter the correct city name (try enter the international English name)',
@@ -299,9 +299,8 @@ async function updateData() {
       alert(alertsArray[sessionStorage.lang]);
       return;
     }
-    sessionStorage.setItem('timezone', result.city.timezone);
-    currentDateConstructor();
 
+    sessionStorage.setItem('timezone', result.city.timezone);
 
     infoLocation.innerHTML = `${result.city.name}, ${getName(result.city.country)}`;
 
@@ -501,6 +500,7 @@ async function updateData() {
     /* eslint-enable no-unused-vars */
     /* eslint-enable no-undef */
   });
+  currentDateConstructor();
 }
 
 searchRowButton.addEventListener('click', () => {
@@ -561,7 +561,6 @@ function chooseLang(event) {
   sessionStorage.lang = newLang;
 
   for (let i = 0; i < 3; i += 1) {
-    console.log(+sessionStorage.curDay + i + 1);
     forecastItemDayArray[i].innerHTML = setDay(+sessionStorage.curDay + i + 1);
   }
 
