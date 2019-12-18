@@ -283,7 +283,7 @@ navigator.geolocation.getCurrentPosition(success, error, options);
 function setDay(index) {
   let i = index;
   if (i > 6) {
-    i = 0;
+    i -= 7;
   }
   let days;
   if (sessionStorage.lang.toLowerCase() === 'en') {

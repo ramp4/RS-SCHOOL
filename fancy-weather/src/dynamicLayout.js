@@ -155,7 +155,7 @@ const searchRowButton = document.querySelector('.search-row__button');
 function setDay(index) {
   let i = index;
   if (i > 6) {
-    i = 0;
+    i -= 7;
   }
   let days;
   if (sessionStorage.lang.toLowerCase() === 'en') {
@@ -169,7 +169,7 @@ function setDay(index) {
   if (sessionStorage.lang.toLowerCase() === 'be') {
     days = ['Нядзеля', 'Панядзелак', 'аўторак', 'серада', 'чацвер', 'Пятніца', 'Субота'];
   }
-
+  console.log(days[i]);
   return days[i];
 }
 
@@ -561,18 +561,13 @@ function chooseLang(event) {
   sessionStorage.lang = newLang;
 
   for (let i = 0; i < 3; i += 1) {
-    console.log(sessionStorage.lang);
+    console.log(+sessionStorage.curDay + i + 1);
     forecastItemDayArray[i].innerHTML = setDay(+sessionStorage.curDay + i + 1);
   }
 
 
   currentDateConstructor();
 
-  const daysForTranslate = [forecastItemDayArray[0], forecastItemDayArray[1], forecastItemDayArray[2]];
-
-  for (let i = 0; i < 3; i += 1) {
-    daysForTranslate[i].innerHTML = setDay(sessionStorage.curDay + i);
-  }
 
   const langSwitcherItemCurrent = document.querySelector('.lang-switcher__item_current');
   langSwitcherItemCurrent.classList.remove('lang-switcher__item_current');
