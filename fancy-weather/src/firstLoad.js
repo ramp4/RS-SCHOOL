@@ -488,6 +488,7 @@ async function updateWeatherData() {
       const humidity = { en: 'HUMIDITY: ', ru: 'влажность:', be: 'вільготнасць:' };
 
       detailsItems[1].innerHTML = `${feelsLike[sessionStorage.lang]} ${Math.round(weatherData.main.feels_like)}°`;
+      sessionStorage.feelsLike = weatherData.main.feels_like;
       detailsItems[2].innerHTML = `${wind[sessionStorage.lang]} ${Math.round(weatherData.wind.speed)} ${windMS[sessionStorage.lang]}`;
       detailsItems[3].innerHTML = `${humidity[sessionStorage.lang]}  ${Math.round(weatherData.main.humidity)}%`;
 

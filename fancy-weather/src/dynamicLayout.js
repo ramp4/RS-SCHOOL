@@ -116,7 +116,10 @@ for (let i = 0; i < 2; i += 1) {
     mainWeatherTemperature.innerHTML = `${convertTemperature(value)}`;
 
     const feelsLike = { en: 'feels like:', ru: 'чувствуется как:', be: 'адчуваецца як:' };
-    value = detailsWeather.innerHTML.slice(12, detailsWeather.innerHTML.length - 1);
+
+
+    value = detailsWeather.innerHTML.slice(feelsLike[sessionStorage.lang].length + 1, detailsWeather.innerHTML.length - 1);
+
     detailsWeather.innerHTML = `${feelsLike[sessionStorage.lang]} ${convertTemperature(value)}°`;
 
     for (let j = 0; j < 3; j += 1) {
@@ -550,8 +553,6 @@ function translatePage(translateTo) {
       itemsForTranslte[i].innerHTML = translatedItem;
     });
   }
-  const searchRowFieldLangs = { en: 'Search city or ZIP', ru: 'Поиск города или ZIP', be: 'Пошук горада ці ZIP' };
-  searchRowField.value = searchRowFieldLangs[sessionStorage.lang];
 }
 
 function chooseLang(event) {
@@ -559,6 +560,12 @@ function chooseLang(event) {
   const newLang = event.target.innerHTML.toLowerCase();
   translatePage(newLang);
   sessionStorage.lang = newLang;
+
+
+  const searchRowFieldLangs = { en: 'Search city or ZIP', ru: 'Поиск города или ZIP', be: 'Пошук горада ці ZIP' };
+  searchRowField.value = searchRowFieldLangs[sessionStorage.lang];
+  const searchRowButtonLangs = { en: 'Search', ru: 'Найти', be: 'Знайсці' };
+  searchRowButton.innerHTML = searchRowButtonLangs[sessionStorage.lang];
 
   for (let i = 0; i < 3; i += 1) {
     forecastItemDayArray[i].innerHTML = setDay(+sessionStorage.curDay + i + 1);
